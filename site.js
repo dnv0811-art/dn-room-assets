@@ -3102,10 +3102,11 @@ void main(){
   canvas.addEventListener('touchcancel', () => { touch = null; }, { passive: true });
 
   // tilting the phone moves the view too. The way it is being held counts as "straight ahead", and that slowly
-  // follows the hand, so the room works at any angle. iPhones only give the sensor after a tap: the Tilt button.
+  // follows the hand, so the room works at any angle. iPhones only give the sensor after a touch, so the first touch
+  // on the room asks for it; the Tilt button turns it off and on, and says what went wrong if nothing comes in.
   const tiltBtn = document.getElementById('tilt');
-  const TILT_ASK = window.DeviceOrientationEvent && DeviceOrientationEvent.requestPermission;
-  let tiltOn = false, tiltZero = null;
+  const TILT_ASK = !!window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function';
+  let tiltOn = false, tiltZero = null, tiltSeen = false, tiltOff = false, tiltRel = false;
   function setTilt(on) {
     tiltOn = on; tiltZero = null;
     tiltBtn.textContent = on ? 'Tilt on' : 'Tilt off';
@@ -3114,38 +3115,46 @@ void main(){
   }
   function onTilt(e) {
     if (e.gamma == null || e.beta == null) return;
-    if (!TILT_ASK && !document.body.classList.contains('can-tilt')) { document.body.classList.add('can-tilt'); setTilt(true); }   // this phone has the sensor
+    if (e.type === 'deviceorientation') tiltRel = true; else if (tiltRel) return;   // some Androids only send the "absolute" kind
+    if (!tiltSeen) { tiltSeen = true; if (!tiltOff) setTilt(true); }                // the sensor is alive
     if (!tiltOn) return;
     const a = ((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0) % 360;
     const x = a === 90 ? e.beta : a === 270 || a === -90 ? -e.beta : e.gamma;
     const y = a === 90 ? -e.gamma : a === 270 || a === -90 ? e.gamma : e.beta;
     if (!tiltZero || Math.abs(x - tiltZero[0]) > 50 || Math.abs(y - tiltZero[1]) > 50) tiltZero = [x, y];
     tiltZero[0] += (x - tiltZero[0]) * .0015; tiltZero[1] += (y - tiltZero[1]) * .0015;
-    const nx = Math.max(-1, Math.min(1, (x - tiltZero[0]) / 18)), ny = Math.max(-1, Math.min(1, (y - tiltZero[1]) / 18));
+    const nx = Math.max(-1, Math.min(1, (x - tiltZero[0]) / 15)), ny = Math.max(-1, Math.min(1, (y - tiltZero[1]) / 15));
     const v = view(true);
-    S.tiltT = [nx * Math.min(.1, Math.max(0, v.cx - v.hx), Math.max(0, 1 - v.cx - v.hx)),
+    S.tiltT = [nx * Math.min(.13, Math.max(0, v.cx - v.hx), Math.max(0, 1 - v.cx - v.hx)),
                -ny * Math.min(.05, Math.max(0, v.cy - v.hy), Math.max(0, 1 - v.cy - v.hy))];
     S.mouseT = [nx * .5, ny * .5];
   }
   if (TOUCH && window.DeviceOrientationEvent) {
-    let listening = !TILT_ASK;
-    if (TILT_ASK) {
-      document.body.classList.add('can-tilt');
-      // already allowed, or no question needed on this phone: just turn it on (without a tap iPhones refuse quietly)
-      DeviceOrientationEvent.requestPermission().then(answer => {
-        if (answer !== 'granted' || listening) return;
-        addEventListener('deviceorientation', onTilt); listening = true; setTilt(true);
-      }).catch(() => {});
-    } else addEventListener('deviceorientation', onTilt);
+    document.body.classList.add('can-tilt');
+    addEventListener('deviceorientation', onTilt);
+    addEventListener('deviceorientationabsolute', onTilt);
+    const askTilt = async () => {          // must start inside a touch or a click
+      if (!TILT_ASK) return 'granted';
+      try { return await DeviceOrientationEvent.requestPermission(); } catch (err) { return 'error'; }
+    };
+    const reportTilt = answer => {
+      if (answer === 'denied') { sayThought('Motion access is blocked in the browser settings.', 6000); return; }
+      setTimeout(() => {
+        if (tiltOff) return;
+        sayThought(tiltSeen ? 'Tilt the phone to look around.' : 'This browser sends no motion data.', 5000);
+      }, 1200);
+    };
+    canvas.addEventListener('touchend', async () => {   // the first touch on the room
+      if (!TILT_ASK || tiltSeen || tiltOff) return;
+      const answer = await askTilt();
+      if (answer === 'granted' || answer === 'denied') reportTilt(answer);
+    }, { once: true, passive: true });
     tiltBtn.addEventListener('click', async () => {
-      if (tiltOn) { setTilt(false); return; }
-      if (!listening) {
-        let answer = 'denied';
-        try { answer = await DeviceOrientationEvent.requestPermission(); } catch (err) {}
-        if (answer !== 'granted') { document.body.classList.remove('can-tilt'); return; }
-        addEventListener('deviceorientation', onTilt); listening = true;
-      }
-      setTilt(true);
+      if (tiltOn) { tiltOff = true; setTilt(false); return; }
+      tiltOff = false;
+      const answer = await askTilt();
+      if (tiltSeen && answer !== 'denied') setTilt(true);
+      reportTilt(answer);
     });
   }
 

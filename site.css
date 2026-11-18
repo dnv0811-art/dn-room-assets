@@ -651,7 +651,8 @@
     .tcase { translate: calc(var(--w) * -.57) -50%; }
     .tside { left: calc(50% - var(--w) * .57); }
     .tape-layer.open .tcase .tape { transform: translate(calc(var(--w) * -.42), calc(var(--w) * -.13)) rotate(90deg); }
-    .tcase > .sticker { left: calc(var(--w) * .3); top: calc(var(--w) * 1.405); rotate: -6deg; z-index: 1; transition: transform .35s cubic-bezier(.3,1.6,.5,1), box-shadow .3s ease, opacity .2s ease; }
+    .tcase > .sticker { left: calc(var(--w) * .31); top: calc(var(--w) * 1.405); width: calc(var(--w) * .46); rotate: -6deg; z-index: 1;
+      appearance: none; -webkit-appearance: none; justify-content: flex-start; padding: 0 0 0 calc(var(--w) * .045);   /* a fixed start: iOS doesn't centre it the same */ transition: transform .35s cubic-bezier(.3,1.6,.5,1), box-shadow .3s ease, opacity .2s ease; }
     .tape-layer.launch .tcase > .sticker, .tape-layer.zoom .tcase > .sticker { opacity: 0; }
     .ft .sticker { display: none; }
   }
@@ -673,6 +674,25 @@
   @media (pointer: coarse) and (max-width: 700px) and (orientation: portrait) {
     .tape-layer.open.zoom .tcase { transform: translateX(calc(var(--w) * .07)) scale(var(--zk, 1.15)) !important; }
   }
+  /* upright phones: Memories is one long sheet that scrolls, two things to a row, instead of the wide folder */
+  .nb-sheet, .nb-list-close { display: none; }
+  .nb-layer.list .nb { display: none; }
+  .nb-layer.list .nb-sheet { --w: 560px; display: block; position: absolute; left: 12px; right: 12px; top: calc(env(safe-area-inset-top, 0px) + 52px); bottom: 58px;
+    overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; border-radius: 4px; color: #3a2a1c;
+    background: radial-gradient(ellipse at 50% 30%, #f6ecd6, #e8d9b9); box-shadow: 0 0 0 5px #d2b077, 0 24px 50px rgba(0,0,0,.6);
+    opacity: 0; transform: translateY(40px); transition: opacity .25s ease, transform .3s cubic-bezier(.2,.8,.3,1); }
+  .nb-layer.list.open .nb-sheet { opacity: 1; transform: none; }
+  .nb-sheet-head { position: sticky; top: 0; z-index: 3; display: flex; justify-content: space-between; align-items: baseline; padding: 16px 18px 10px;
+    font: 400 24px/1 var(--hand); color: #2a1d12; background: #f3e8d0; border-bottom: 1px solid rgba(110,78,45,.3); }
+  .nb-sheet-head span:last-child { font-size: 19px; }
+  .nb-cells { display: grid; grid-template-columns: 1fr 1fr; }
+  .nb-cell { position: relative; padding: 26px 16px 14px; border-bottom: 1px solid rgba(110,78,45,.3); }
+  .nb-cell:nth-child(odd) { border-right: 1px solid rgba(110,78,45,.3); }
+  .nb-cell > b { position: absolute; left: 9px; top: 9px; font: 600 10px/1 Inter, sans-serif; letter-spacing: .12em; color: rgba(110,78,45,.65); }
+  .nb-sheet .nb-item { position: relative; left: 0 !important; top: 0 !important; width: 100%; }
+  .nb-sheet .nb-item .cap { width: 100%; min-height: 1.1em; font-size: 17px; }
+  .nb-layer.list .nb-list-close { display: block; position: absolute; left: 50%; bottom: 22px; translate: -50% 0; }
+  body.nb-list .skills, body.nb-list .memories { opacity: 0 !important; pointer-events: none !important; }
   /* the narrowest phones: both rows have to fit side by side */
   @media (max-width: 360px) {
     .name { font-size: 17px; }

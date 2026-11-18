@@ -3150,21 +3150,43 @@ void main(){
     tiltBtn.setAttribute('aria-pressed', on);
     if (!on) { S.tiltT = [0, 0]; S.mouseT = [0, 0]; }
   }
+  // The phone's pose as a rotation matrix (rows, flat), not as its three angles: those jump about when the phone is
+  // held nearly upright, while the matrix stays smooth in every position.
+  function tiltR(a, b, g) {
+    const k = Math.PI / 180, ca = Math.cos(a * k), sa = Math.sin(a * k), cb = Math.cos(b * k), sb = Math.sin(b * k), cg = Math.cos(g * k), sg = Math.sin(g * k);
+    return [ca * cg - sa * sb * sg, -sa * cb, ca * sg + sa * sb * cg,
+            sa * cg + ca * sb * sg, ca * cb, sa * sg - ca * sb * cg,
+            -cb * sg, sb, cb * cg];
+  }
+  // how far the phone has turned from pose A to pose B, in its own frame: [about its width, about its height] (sines)
+  function tiltTurn(A, B) {
+    const d = (i, j) => A[i] * B[j] + A[i + 3] * B[j + 3] + A[i + 6] * B[j + 6];   // (Aᵀ·B)[i][j]
+    return [(d(2, 1) - d(1, 2)) / 2, (d(0, 2) - d(2, 0)) / 2];
+  }
+  // "straight ahead" drifts slowly toward how the phone is being held, and stays a clean rotation
+  function tiltFollow(A, B, k) {
+    const m = A.map((v, i) => v + (B[i] - v) * k), u = m.slice(0, 3), n = Math.hypot(...u); u.forEach((v, i) => u[i] = v / n);
+    const w = m.slice(3, 6), dot = w[0] * u[0] + w[1] * u[1] + w[2] * u[2]; w.forEach((v, i) => w[i] = v - dot * u[i]);
+    const l = Math.hypot(...w); w.forEach((v, i) => w[i] = v / l);
+    return [...u, ...w, u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]];
+  }
   function onTilt(e) {
     if (e.gamma == null || e.beta == null) return;
     if (e.type === 'deviceorientation') tiltRel = true; else if (tiltRel) return;   // some Androids only send the "absolute" kind
     if (!tiltSeen) { tiltSeen = true; if (!tiltOff) setTilt(true); }                // the sensor is alive
     if (!tiltOn) return;
+    const R = tiltR(e.alpha || 0, e.beta, e.gamma);
+    let turn = tiltZero && tiltTurn(tiltZero, R);
+    if (!turn || Math.abs(turn[0]) > .77 || Math.abs(turn[1]) > .77) { tiltZero = R.slice(); turn = [0, 0]; }   // past 50°: this is the new "straight ahead"
+    tiltZero = tiltFollow(tiltZero, R, .0015);
     const a = ((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0) % 360;
-    const x = a === 90 ? e.beta : a === 270 || a === -90 ? -e.beta : e.gamma;
-    const y = a === 90 ? -e.gamma : a === 270 || a === -90 ? e.gamma : e.beta;
-    if (!tiltZero || Math.abs(x - tiltZero[0]) > 50 || Math.abs(y - tiltZero[1]) > 50) tiltZero = [x, y];
-    tiltZero[0] += (x - tiltZero[0]) * .0015; tiltZero[1] += (y - tiltZero[1]) * .0015;
-    const nx = Math.max(-1, Math.min(1, (x - tiltZero[0]) / 15)), ny = Math.max(-1, Math.min(1, (y - tiltZero[1]) / 15));
-    const v = view(true);
-    const reach = S.zoomed ? .45 / S.zoom : 1;   // zoomed in the same tilt moves less, so the TV stays in the frame
-    S.tiltT = [nx * Math.min(.13 * reach, Math.max(0, v.cx - v.hx), Math.max(0, 1 - v.cx - v.hx)),
-               -ny * Math.min(.05 * reach, Math.max(0, v.cy - v.hy), Math.max(0, 1 - v.cy - v.hy))];
+    const side = a === 90 ? turn[0] : a === 270 || a === -90 ? -turn[0] : turn[1];    // about the screen's upright axis
+    const nod = a === 90 ? -turn[1] : a === 270 || a === -90 ? turn[1] : turn[0];     // about the screen's level axis
+    const nx = Math.max(-1, Math.min(1, side * 57.3 / 15)), ny = Math.max(-1, Math.min(1, nod * 57.3 / 15));
+    // how far it moves is a share of what's on screen, so both directions read the same at any zoom
+    const v = view(true), fx = S.zoomed ? .25 : .54, fy = S.zoomed ? .18 : .54;
+    S.tiltT = [Math.max(-Math.max(0, v.cx - v.hx), Math.min(Math.max(0, 1 - v.cx - v.hx), nx * fx * 2 * v.hx)),
+               Math.max(-Math.max(0, v.cy - v.hy), Math.min(Math.max(0, 1 - v.cy - v.hy), -ny * fy * 2 * v.hy))];
     S.mouseT = [nx * .5, ny * .5];
   }
   if (TOUCH && window.DeviceOrientationEvent) {

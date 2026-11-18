@@ -644,6 +644,27 @@
     .tag { width: 112px; height: 112px; margin: -56px 0 0 -56px; font-size: 10px; }
     #loader .meta { font-size: 11px; }
   }
+  /* phones: the tape as large as the screen allows (sleeve + the cassette sticking out of it = 1.6 × --w),
+     the sticker moved in along the cassette so it isn't cut off by the screen's edge */
+  @media (max-width: 700px) and (orientation: portrait) {
+    .tape-layer { --w: min(60vw, 42vh); }
+    .tcase .stick-pin, .ft .stick-pin { top: 34%; }
+  }
+  @media (max-height: 500px) and (orientation: landscape) { .tape-layer { --w: min(30vw, 54vh); } }
+  /* touch screens: tapping the sleeve brings it up close, so the small print on it can be read */
+  .tape-tip { display: none; }
+  @media (pointer: coarse) {
+    .tcase .sleeve { pointer-events: auto; }
+    .tape-tip { display: block; position: absolute; left: 50%; bottom: calc(var(--edge) + 30px); translate: -50% 0; color: #fff; font: 400 18px/1 var(--hand);
+      white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+    .tape-layer.open .tape-tip { opacity: .85; transition-delay: 1.1s; }
+    .tape-layer.open.zoom .tape-tip { opacity: 0; transition-delay: 0s; }
+    .tape-layer.open.zoom .tcase { transform: translateX(calc(var(--w) * .246)) scale(var(--zk, 1.4)) !important; transition: transform .4s cubic-bezier(.2,.8,.3,1) !important; }
+    .tape-layer.zoom .tcase .sleeve { rotate: 0deg; }
+    .tape-layer.zoom .tcase .tape { opacity: 0; transition: opacity .15s ease !important; }
+    .tape-layer.zoom .tcase .sticker { pointer-events: none; }
+    .tape-layer.zoom .tside { opacity: 0 !important; pointer-events: none; }
+  }
   /* the narrowest phones: both rows have to fit side by side */
   @media (max-width: 360px) {
     .name { font-size: 17px; }

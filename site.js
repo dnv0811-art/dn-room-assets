@@ -3107,9 +3107,10 @@ void main(){
   // on the room asks for it; the Tilt button turns it off and on, and says what went wrong if nothing comes in.
   const tiltBtn = document.getElementById('tilt');
   const TILT_ASK = !!window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function';
-  let tiltOn = false, tiltZero = null, tiltSeen = false, tiltOff = false, tiltRel = false;
+  let tiltOn = false, tiltSeen = false, tiltOff = false, tiltRel = false;
+  const tiltState = { zero: null, held: [0, 0] };
   function setTilt(on) {
-    tiltOn = on; tiltZero = null;
+    tiltOn = on; tiltState.zero = null;
     tiltBtn.textContent = on ? 'Tilt on' : 'Tilt off';
     tiltBtn.setAttribute('aria-pressed', on);
     if (!on) { S.tiltT = [0, 0]; S.mouseT = [0, 0]; }
@@ -3134,24 +3135,33 @@ void main(){
     const l = Math.hypot(...w); w.forEach((v, i) => w[i] = v / l);
     return [...u, ...w, u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]];
   }
+  // From the phone's pose to how far the view leans, -1…1 on each axis [sideways, up-down]. The view stays where it was
+  // put: nothing pulls it back to the middle. Past the 15° limit "straight ahead" is simply carried along with the phone,
+  // so turning back answers at once, and the last 1.5° of play swallows the little kick back when a move stops.
+  function tiltStep(st, R, a) {
+    if (!st.zero) { st.zero = R.slice(); st.held = [0, 0]; }
+    let t = tiltTurn(st.zero, R);
+    const LIMIT = .2588, m = Math.max(Math.abs(t[0]), Math.abs(t[1]));   // sin 15°
+    if (m > LIMIT) { st.zero = tiltFollow(st.zero, R, (m - LIMIT) / m); t = tiltTurn(st.zero, R); }
+    const side = a === 90 ? t[0] : a === 270 || a === -90 ? -t[0] : t[1];    // about the screen's upright axis
+    const nod = a === 90 ? -t[1] : a === 270 || a === -90 ? t[1] : t[0];     // about the screen's level axis
+    return [side, nod].map((v, i) => {
+      const deg = v * 57.3, PLAY = 1.5;
+      st.held[i] = Math.max(deg - PLAY, Math.min(deg + PLAY, st.held[i]));
+      return Math.max(-1, Math.min(1, st.held[i] / 13.5));
+    });
+  }
   function onTilt(e) {
     if (e.gamma == null || e.beta == null) return;
     if (e.type === 'deviceorientation') tiltRel = true; else if (tiltRel) return;   // some Androids only send the "absolute" kind
     if (!tiltSeen) { tiltSeen = true; if (!tiltOff) setTilt(true); }                // the sensor is alive
     if (!tiltOn) return;
-    const R = tiltR(e.alpha || 0, e.beta, e.gamma);
-    let turn = tiltZero && tiltTurn(tiltZero, R);
-    if (!turn || Math.abs(turn[0]) > .77 || Math.abs(turn[1]) > .77) { tiltZero = R.slice(); turn = [0, 0]; }   // past 50°: this is the new "straight ahead"
-    tiltZero = tiltFollow(tiltZero, R, .0015);
     const a = ((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0) % 360;
-    const side = a === 90 ? turn[0] : a === 270 || a === -90 ? -turn[0] : turn[1];    // about the screen's upright axis
-    const nod = a === 90 ? -turn[1] : a === 270 || a === -90 ? turn[1] : turn[0];     // about the screen's level axis
-    const nx = Math.max(-1, Math.min(1, side * 57.3 / 15)), ny = Math.max(-1, Math.min(1, nod * 57.3 / 15));
+    const [nx, ny] = tiltStep(tiltState, tiltR(e.alpha || 0, e.beta, e.gamma), a);
     // how far it moves is a share of what's on screen, so both directions read the same at any zoom
     const v = view(true), fx = S.zoomed ? .25 : .54, fy = S.zoomed ? .18 : .54;
     S.tiltT = [Math.max(-Math.max(0, v.cx - v.hx), Math.min(Math.max(0, 1 - v.cx - v.hx), nx * fx * 2 * v.hx)),
                Math.max(-Math.max(0, v.cy - v.hy), Math.min(Math.max(0, 1 - v.cy - v.hy), -ny * fy * 2 * v.hy))];
-    S.mouseT = [nx * .5, ny * .5];
   }
   if (TOUCH && window.DeviceOrientationEvent) {
     document.body.classList.add('can-tilt');

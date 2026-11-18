@@ -576,23 +576,25 @@ const corsify = el => { if (CORS) el.crossOrigin = 'anonymous'; return el; };
    tag:     a short line about it
    cover:   the VHS sleeve (projects/…, 2:3 picture)
    sticker: colour of the "Play the site" sticker, from the cover's accent
+   still:   the site's picture on the TV until its clip has loaded (or if it has none) → projects/<name>-still.jpg;
+            without one the TV shows the cover
    tv:      the short looping clip on the TV        → projects/<name>-tv.mp4
    tape:    the long walkthrough the cassette plays → projects/<name>-tape.mp4
-   A clip that isn't uploaded yet is fine: the TV shows a placeholder, the sticker says "Coming soon".
+   A clip that isn't uploaded yet is fine: the TV keeps the still, the sticker says "Coming soon".
    ===================================================================== */
 const WORKS = [
-  { title: 'QueenLash',    tag: 'Cosmetics · Online store',       sticker: '#efb0cb', cover: 'projects/queenlash-cover.jpg',   tv: 'projects/queenlash-tv.mp4',   tape: 'projects/queenlash-tape.mp4' },
+  { title: 'QueenLash',    tag: 'Cosmetics · Online store',       sticker: '#efb0cb', cover: 'projects/queenlash-cover.jpg',   still: 'projects/queenlash-still.jpg', tv: 'projects/queenlash-tv.mp4',   tape: 'projects/queenlash-tape.mp4' },
   { title: 'Meva Fresh',   tag: 'Fruit import · Corporate site',  sticker: '#b3d95c', cover: 'projects/mevafresh-cover.jpg',   tv: 'projects/mevafresh-tv.mp4',   tape: 'projects/mevafresh-tape.mp4' },
-  { title: 'Arkhidom',     tag: 'Architecture · Website',         sticker: '#f0c08f', cover: 'projects/arkhidom-cover.jpg',    tv: 'projects/arkhidom-tv.mp4',    tape: 'projects/arkhidom-tape.mp4' },
-  { title: 'Fuenf',        tag: 'Fashion & production · Website', sticker: '#cdf03a', cover: 'projects/fuenf-cover.jpg',       tv: 'projects/fuenf-tv.mp4',       tape: 'projects/fuenf-tape.mp4' },
-  { title: 'Simply',       tag: 'AI implementation · Website',    sticker: '#ffd23f', cover: 'projects/simply-cover.jpg',      tv: 'projects/simply-tv.mp4',      tape: 'projects/simply-tape.mp4' },
-  { title: 'Slide Projex', tag: 'Video production · One-pager',   sticker: '#e6f24e', cover: 'projects/slideprojex-cover.jpg', tv: 'projects/slideprojex-tv.mp4', tape: 'projects/slideprojex-tape.mp4' },
-  { title: 'Sam Yakushev', tag: 'Entrepreneur · Personal site',   sticker: '#ec5a4c', cover: 'projects/samyakushev-cover.jpg', tv: 'projects/samyakushev-tv.mp4', tape: 'projects/samyakushev-tape.mp4' },
-  { title: 'Blocklabs',    tag: 'Web3 · Promo site',              sticker: '#f2b53a', cover: 'projects/blocklabs-cover.jpg',   tv: 'projects/blocklabs-tv.mp4',   tape: 'projects/blocklabs-tape.mp4' },
+  { title: 'Arkhidom',     tag: 'Architecture · Website',         sticker: '#f0c08f', cover: 'projects/arkhidom-cover.jpg',    still: 'projects/arkhidom-still.jpg', tv: 'projects/arkhidom-tv.mp4',    tape: 'projects/arkhidom-tape.mp4' },
+  { title: 'Fuenf',        tag: 'Fashion & production · Website', sticker: '#cdf03a', cover: 'projects/fuenf-cover.jpg',       still: 'projects/fuenf-still.jpg', tv: 'projects/fuenf-tv.mp4',       tape: 'projects/fuenf-tape.mp4' },
+  { title: 'Simply',       tag: 'AI implementation · Website',    sticker: '#ffd23f', cover: 'projects/simply-cover.jpg',      still: 'projects/simply-still.jpg', tv: 'projects/simply-tv.mp4',      tape: 'projects/simply-tape.mp4' },
+  { title: 'Slide Projex', tag: 'Video production · One-pager',   sticker: '#e6f24e', cover: 'projects/slideprojex-cover.jpg', still: 'projects/slideprojex-still.jpg', tv: 'projects/slideprojex-tv.mp4', tape: 'projects/slideprojex-tape.mp4' },
+  { title: 'Sam Yakushev', tag: 'Entrepreneur · Personal site',   sticker: '#ec5a4c', cover: 'projects/samyakushev-cover.jpg', still: 'projects/samyakushev-still.jpg', tv: 'projects/samyakushev-tv.mp4', tape: 'projects/samyakushev-tape.mp4' },
+  { title: 'Blocklabs',    tag: 'Web3 · Promo site',              sticker: '#f2b53a', cover: 'projects/blocklabs-cover.jpg',   still: 'projects/blocklabs-still.jpg', tv: 'projects/blocklabs-tv.mp4',   tape: 'projects/blocklabs-tape.mp4' },
   { title: 'Clinique 7',   tag: 'Plastic surgery · Landing page', sticker: '#b9a6e6', cover: 'projects/clinique-cover.jpg',    tv: 'projects/clinique7-tv.mp4',   tape: 'projects/clinique7-tape.mp4' },
 ];
 // the TV's channels and the shelf's tapes are the same list, in the same order
-const PROJECTS = WORKS.map(w => ({ title: w.title, tag: w.tag, video: w.tv }));
+const PROJECTS = WORKS.map(w => ({ title: w.title, tag: w.tag, video: w.tv, img: w.still, cover: w.cover }));
 const TAPES = WORKS.map(w => ({ title: w.title, tag: w.tag, sticker: w.sticker, cover: w.cover, video: w.tape }));
 
 (() => {
@@ -1139,53 +1141,14 @@ void main(){
   };
 
   /* ================= PROJECT TEXTURES ================= */
-  const PALETTES = [
-    ['#0e1a2b', '#f2efe6', '#7cf0c5'],
-    ['#efe4d2', '#1c1712', '#d9542b'],
-    ['#120d1e', '#f5e9ff', '#ff4fa0'],
-    ['#dfe3da', '#121411', '#3d6b3a'],
-    ['#f4f13b', '#0d0d0d', '#2f45ff'],
-  ];
-  function rr(c, x, y, w, h, r) { c.beginPath(); c.roundRect ? c.roundRect(x, y, w, h, r) : c.rect(x, y, w, h); }
-
-  function drawPlaceholder(c, p, i) {
-    const [bg, fg, ac] = PALETTES[i % PALETTES.length];
-    const W = TEX_W, H = TEX_H;
-    c.fillStyle = bg; c.fillRect(0, 0, W, H);
-    // nav
-    c.fillStyle = fg; c.font = '500 22px "Space Grotesk", sans-serif'; c.textBaseline = 'middle';
-    c.fillText(p.title.split(' ')[0] + '®', 64, 76);
-    c.font = '400 17px "Space Grotesk", sans-serif'; c.globalAlpha = .7;
-    ['Work', 'About', 'Journal', 'Contact'].forEach((l, k) => c.fillText(l, W - 420 + k * 92, 76));
-    c.globalAlpha = 1;
-    c.fillStyle = fg; c.globalAlpha = .15; c.fillRect(64, 112, W - 128, 1); c.globalAlpha = 1;
-    // visual block (varies per project)
-    const vx = W * .52, vy = 150, vw = W - vx - 64, vh = H - vy - 150;
-    c.save(); rr(c, vx, vy, vw, vh, 18); c.clip();
-    const gr = c.createLinearGradient(vx, vy, vx + vw, vy + vh);
-    gr.addColorStop(0, ac); gr.addColorStop(1, fg === '#0d0d0d' || fg === '#121411' || fg === '#1c1712' ? '#fff' : bg);
-    c.fillStyle = gr; c.fillRect(vx, vy, vw, vh);
-    c.globalAlpha = .9;
-    if (i % 3 === 0) { for (let k = 0; k < 6; k++) { c.beginPath(); c.arc(vx + vw * .5, vy + vh * .55, 30 + k * 34, 0, Math.PI * 2); c.strokeStyle = bg; c.lineWidth = 3; c.stroke(); } }
-    else if (i % 3 === 1) { c.fillStyle = bg; c.beginPath(); c.ellipse(vx + vw * .5, vy + vh * .62, vw * .26, vh * .3, 0, 0, Math.PI * 2); c.fill(); c.fillStyle = ac; c.fillRect(vx + vw * .44, vy + vh * .22, vw * .12, vh * .14); }
-    else { c.fillStyle = bg; for (let k = 0; k < 5; k++) c.fillRect(vx + 30 + k * (vw - 60) / 5, vy + vh - 40 - (k + 1) * vh * .13, (vw - 60) / 5 - 14, (k + 1) * vh * .13); }
-    c.restore(); c.globalAlpha = 1;
-    // headline
-    c.fillStyle = fg; c.textBaseline = 'alphabetic';
-    const words = p.title.toUpperCase().split(' ');
-    c.font = '700 84px "Space Grotesk", sans-serif';
-    words.forEach((w, k) => c.fillText(w, 60, 250 + k * 82));
-    c.font = '400 20px "Space Grotesk", sans-serif'; c.globalAlpha = .7;
-    c.fillText(p.tag, 64, 250 + words.length * 82 + 20);
-    c.fillText('Designed for people who notice details.', 64, 250 + words.length * 82 + 50);
-    c.globalAlpha = 1;
-    rr(c, 64, 250 + words.length * 82 + 84, 190, 54, 27); c.fillStyle = ac; c.fill();
-    c.fillStyle = bg === '#f4f13b' ? '#fff' : bg; c.font = '500 18px "Space Grotesk", sans-serif'; c.textBaseline = 'middle';
-    c.fillText('Explore  →', 98, 250 + words.length * 82 + 112);
-    // bottom cards
-    c.globalAlpha = .12; c.fillStyle = fg;
-    for (let k = 0; k < 4; k++) { rr(c, 64 + k * ((W - 128) / 4), H - 110, (W - 128) / 4 - 18, 140, 14); c.fill(); }
-    c.globalAlpha = 1;
+  // nothing to show yet: the VCR's own blue screen
+  function drawBlank(c) { c.fillStyle = '#1b2aa8'; c.fillRect(0, 0, TEX_W, TEX_H); }
+  // a project with no picture of its site: its cover, whole, in the middle of the tube over a dimmed copy of itself
+  function drawCoverArt(c, im) {
+    const W = im.naturalWidth, H = im.naturalHeight, k = TEX_H / H, w = W * k, fill = W * TEX_H / TEX_W;
+    c.fillStyle = '#0b0a09'; c.fillRect(0, 0, TEX_W, TEX_H);
+    c.globalAlpha = .28; c.drawImage(im, 0, (H - fill) / 2, W, fill, 0, 0, TEX_W, TEX_H); c.globalAlpha = 1;
+    c.drawImage(im, (TEX_W - w) / 2, 0, w, TEX_H);
   }
 
   // widescreen site on a 4:3 tube: fit the whole width and letterbox it, like a film on an old TV
@@ -1235,7 +1198,7 @@ void main(){
   function buildProjectTexture(p, i, im) {
     const cv = document.createElement('canvas'); cv.width = TEX_W; cv.height = TEX_H;
     const c = cv.getContext('2d');
-    if (im) drawCover(c, im, p.crop); else drawPlaceholder(c, p, i);
+    if (!im) drawBlank(c); else if (p.img) drawCover(c, im, p.crop); else drawCoverArt(c, im);
     drawOSD(c, p, i);
     return cv;
   }
@@ -1248,14 +1211,15 @@ void main(){
         gl.bindTexture(gl.TEXTURE_2D, projTex[i]);
         try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, buildProjectTexture(p, i, im)); }
         catch (e) {
-          // file:// screenshots taint the canvas — keep the placeholder, run via a local server to see real ones
+          // file:// pictures taint the canvas — keep the blue screen, run via a local server to see real ones
           console.warn('Screenshot blocked (open the site through a server):', p.img);
           gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, buildProjectTexture(p, i, null));
         }
       };
       put(null);
       const embedded = window.PROJECT_DATA || {};
-      if (p.img) { const im = corsify(new Image()); im.onload = () => put(im); im.src = embedded[p.img] || ASSET(p.img); }
+      const pic = p.img || p.cover;
+      if (pic) { const im = corsify(new Image()); im.onload = () => put(im); im.src = embedded[pic] || ASSET(pic); }
       if (p.video) {
         const v = corsify(document.createElement('video'));
         v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto';

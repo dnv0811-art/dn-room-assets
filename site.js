@@ -1260,7 +1260,6 @@ void main(){
   const S = {
     zoom: 1, zoomFrom: 1, zoomTo: 1, zT0: 0, zDur: 2600,
     mouse: [0, 0], mouseT: [0, 0], pan: [0, 0], panT: [0, 0],
-    tilt: [0, 0], tiltT: [0, 0],                 // phones: how far tilting the device moves the view
     dist: .32, reveal: 0, revealT0: 0, zoomed: false, started: false,
     tv: false,                                   // zoomed in on the TV (gallery) vs. just leaning in to look at a spot
     fc: null, fcFrom: null, fcTo: null,          // where the camera looks (image uv), animated with the zoom
@@ -1297,7 +1296,7 @@ void main(){
     if (sa > ia) hy = .5 * ia / sa; else hx = .5 * sa / ia;
     hx *= OVERSCAN / S.zoom; hy *= OVERSCAN / S.zoom;
     let [cx, cy] = S.fc || HOME;
-    if (!noPan) { cx += S.pan[0] + S.tilt[0]; cy += S.pan[1] + S.tilt[1]; }
+    if (!noPan) { cx += S.pan[0]; cy += S.pan[1]; }
     cx = Math.min(Math.max(cx, hx + .01), 1 - hx - .01);
     cy = Math.min(Math.max(cy, hy + .01), 1 - hy - .01);
     return { hx, hy, cx, cy };
@@ -1428,7 +1427,7 @@ void main(){
   function zoomTo(z, focus) {
     if (VP.on) vpEnd(true);   // walking away from the set: the tape just stops
     const v = view(!TOUCH);   // on a phone the camera may be anywhere in the room: set off from where it is looking
-    if (TOUCH) { S.pan = [0, 0]; S.panT = [0, 0]; S.tilt = [0, 0]; }
+    if (TOUCH) { S.pan = [0, 0]; S.panT = [0, 0]; }
     S.fcFrom = [v.cx, v.cy]; S.fc = S.fcFrom.slice();
     const wasTv = S.tv;
     S.tv = z > 1 && !focus;
@@ -3108,12 +3107,11 @@ void main(){
   const tiltBtn = document.getElementById('tilt');
   const TILT_ASK = !!window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function';
   let tiltOn = false, tiltSeen = false, tiltOff = false, tiltRel = false;
-  const tiltState = { zero: null, held: [0, 0] };
+  const tiltState = { zero: null, sum: [0, 0], held: [0, 0] };
   function setTilt(on) {
     tiltOn = on; tiltState.zero = null;
     tiltBtn.textContent = on ? 'Tilt on' : 'Tilt off';
     tiltBtn.setAttribute('aria-pressed', on);
-    if (!on) { S.tiltT = [0, 0]; S.mouseT = [0, 0]; }
   }
   // The phone's pose as a rotation matrix (rows, flat), not as its three angles: those jump about when the phone is
   // held nearly upright, while the matrix stays smooth in every position.
@@ -3128,27 +3126,20 @@ void main(){
     const d = (i, j) => A[i] * B[j] + A[i + 3] * B[j + 3] + A[i + 6] * B[j + 6];   // (Aᵀ·B)[i][j]
     return [(d(2, 1) - d(1, 2)) / 2, (d(0, 2) - d(2, 0)) / 2];
   }
-  // "straight ahead" drifts slowly toward how the phone is being held, and stays a clean rotation
-  function tiltFollow(A, B, k) {
-    const m = A.map((v, i) => v + (B[i] - v) * k), u = m.slice(0, 3), n = Math.hypot(...u); u.forEach((v, i) => u[i] = v / n);
-    const w = m.slice(3, 6), dot = w[0] * u[0] + w[1] * u[1] + w[2] * u[2]; w.forEach((v, i) => w[i] = v - dot * u[i]);
-    const l = Math.hypot(...w); w.forEach((v, i) => w[i] = v / l);
-    return [...u, ...w, u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]];
-  }
-  // From the phone's pose to how far the view leans, -1…1 on each axis [sideways, up-down]. The view stays where it was
-  // put: nothing pulls it back to the middle. Past the 15° limit "straight ahead" is simply carried along with the phone,
-  // so turning back answers at once, and the last 1.5° of play swallows the little kick back when a move stops.
+  // How much the phone has turned since the last reading, in degrees [sideways, up-down]. Only the change counts, so
+  // tilt moves the room the way a finger does: as far as the room goes, from wherever it is, with no limit of its own.
+  // 1.5° of play swallows the little kick back when a move stops.
   function tiltStep(st, R, a) {
-    if (!st.zero) { st.zero = R.slice(); st.held = [0, 0]; }
-    let t = tiltTurn(st.zero, R);
-    const LIMIT = .2588, m = Math.max(Math.abs(t[0]), Math.abs(t[1]));   // sin 15°
-    if (m > LIMIT) { st.zero = tiltFollow(st.zero, R, (m - LIMIT) / m); t = tiltTurn(st.zero, R); }
+    if (!st.zero) { st.zero = R; st.sum = [0, 0]; st.held = [0, 0]; return [0, 0]; }
+    const t = tiltTurn(st.zero, R); st.zero = R;
+    if (Math.abs(t[0]) > .5 || Math.abs(t[1]) > .5) return [0, 0];           // a glitch in the sensor, not a move
     const side = a === 90 ? t[0] : a === 270 || a === -90 ? -t[0] : t[1];    // about the screen's upright axis
     const nod = a === 90 ? -t[1] : a === 270 || a === -90 ? t[1] : t[0];     // about the screen's level axis
     return [side, nod].map((v, i) => {
-      const deg = v * 57.3, PLAY = 1.5;
-      st.held[i] = Math.max(deg - PLAY, Math.min(deg + PLAY, st.held[i]));
-      return Math.max(-1, Math.min(1, st.held[i] / 13.5));
+      const PLAY = 1.5, was = st.held[i];
+      st.sum[i] += v * 57.3;
+      st.held[i] = Math.max(st.sum[i] - PLAY, Math.min(st.sum[i] + PLAY, was));
+      return st.held[i] - was;
     });
   }
   function onTilt(e) {
@@ -3157,11 +3148,11 @@ void main(){
     if (!tiltSeen) { tiltSeen = true; if (!tiltOff) setTilt(true); }                // the sensor is alive
     if (!tiltOn) return;
     const a = ((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0) % 360;
-    const [nx, ny] = tiltStep(tiltState, tiltR(e.alpha || 0, e.beta, e.gamma), a);
-    // how far it moves is a share of what's on screen, so both directions read the same at any zoom
-    const v = view(true), fx = S.zoomed ? .25 : .54, fy = S.zoomed ? .18 : .54;
-    S.tiltT = [Math.max(-Math.max(0, v.cx - v.hx), Math.min(Math.max(0, 1 - v.cx - v.hx), nx * fx * 2 * v.hx)),
-               Math.max(-Math.max(0, v.cy - v.hy), Math.min(Math.max(0, 1 - v.cy - v.hy), -ny * fy * 2 * v.hy))];
+    const [side, nod] = tiltStep(tiltState, tiltR(e.alpha || 0, e.beta, e.gamma), a);
+    if (!S.started || VP.on || document.body.classList.contains('note')) return;    // still under a note, the tape shelf or a playing tape
+    // a share of what's on screen per degree, so it feels the same at any zoom
+    const v = view(true), kx = S.zoomed ? .028 : .04, ky = S.zoomed ? .022 : .04;
+    panBy(side * kx * 2 * v.hx, -nod * ky * 2 * v.hy);
   }
   if (TOUCH && window.DeviceOrientationEvent) {
     document.body.classList.add('can-tilt');
@@ -3305,12 +3296,6 @@ void main(){
     const panK = TOUCH ? .22 : .08;              // under a finger the room has to keep up
     S.pan[0] += (S.panT[0] - S.pan[0]) * panK;
     S.pan[1] += (S.panT[1] - S.pan[1]) * panK;
-    // tilt works zoomed in too; it settles while a tape is playing and holds still under a note or the tape shelf
-    if (VP.on) { S.tilt[0] *= .9; S.tilt[1] *= .9; }
-    else if (!document.body.classList.contains('note')) {
-      S.tilt[0] += (S.tiltT[0] - S.tilt[0]) * .1;
-      S.tilt[1] += (S.tiltT[1] - S.tilt[1]) * .1;
-    }
     const lerp = S.zoomed ? .03 : .05;
     const amp = S.zoomed ? .35 : 1; // calmer camera while browsing
     const drift = [Math.sin(t * .23) * .12, Math.cos(t * .17) * .08];

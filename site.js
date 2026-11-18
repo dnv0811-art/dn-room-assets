@@ -593,7 +593,7 @@ const WORKS = [
   { title: 'Slide Projex', tag: 'Video production · One-pager',   sticker: '#e6f24e', cover: 'projects/slideprojex-cover.jpg', still: 'projects/slideprojex-still.jpg', tv: BS('c89W6CxH-V1bGvzwh'), tape: BS('cqKLg9mG-B8wEwvbw') },
   { title: 'Sam Yakushev', tag: 'Entrepreneur · Personal site',   sticker: '#ec5a4c', cover: 'projects/samyakushev-cover.jpg', still: 'projects/samyakushev-still.jpg', tv: BS('rA4qBtpB-B8wEwvbw'), tape: BS('TQuredYt-B8wEwvbw') },
   { title: 'Blocklabs',    tag: 'Web3 · Promo site',              sticker: '#f2b53a', cover: 'projects/blocklabs-cover.jpg',   still: 'projects/blocklabs-still.jpg', tv: BS('ciIl7NdX-B8wEwvbw'),   tape: 'projects/blocklabs-tape.mp4' },
-  { title: 'Clinique 7',   tag: 'Plastic surgery · Landing page', sticker: '#b9a6e6', cover: 'projects/clinique-cover.jpg',    still: 'projects/clinique7-still.jpg', tv: BS('8V8zOo3n-B8wEwvbw'),   tape: BS('oQsmE7Xq-B8wEwvbw') },
+  { title: 'Clinique 7',   tag: 'Plastic surgery · Landing page', sticker: '#b9a6e6', cover: 'projects/clinique-cover.jpg',    still: 'projects/clinique7-still.jpg', tv: BS('zAfB1GZw-B8wEwvbw'),   tape: BS('oQsmE7Xq-B8wEwvbw') },
 ];
 // the TV's channels and the shelf's tapes are the same list, in the same order
 const PROJECTS = WORKS.map(w => ({ title: w.title, tag: w.tag, video: w.tv, img: w.still, cover: w.cover }));
@@ -2394,7 +2394,7 @@ void main(){
     lamp.on = !lamp.on;
     if (lamp.on) lamp.flickerUntil = performance.now() + 420;
     tagText.innerHTML = lamp.on ? 'Switch off<br>the lamp' : 'Switch on<br>the lamp';
-    Sound.lamp();
+    Sound.lamp(lamp.on);
   }
   function itemAt(e) {
     const [x, y] = screenToImage(e.clientX / innerWidth, e.clientY / innerHeight);
@@ -3421,7 +3421,7 @@ void main(){
       const from = music.volume, t0 = performance.now();
       if (to > 0 && music.paused) music.play().catch(() => {});
       const step = now => {
-        const k = Math.min(1, (now - t0) / ms);
+        const k = Math.max(0, Math.min(1, (now - t0) / ms));   // a frame's timestamp can be a little earlier than t0
         music.volume = from + (to - from) * k;
         if (k < 1) fadeRaf = requestAnimationFrame(step);
         else if (to === 0) music.pause();
@@ -3434,7 +3434,7 @@ void main(){
     // recorded sounds (files in the project folder): plain audio elements, so they also play when opened from disk
     const SAMPLES = {};
     const loadSample = f => SAMPLES[f] || (SAMPLES[f] = Object.assign(new Audio(ASSET(f)), { preload: 'auto' }));
-    ['light-switch.mp3', 'newspaper.mp3'].forEach(loadSample);
+    ['lamp-on.m4a', 'lamp-off.m4a', 'paper-unfold.mp3'].forEach(loadSample);
     function sample(f, gain = 1, rate = 1) {
       if (!on) return;
       const a = loadSample(f).cloneNode();
@@ -3546,7 +3546,7 @@ void main(){
       beep: () => { tone(2350, .07, .035); tone(2350, .07, .035, 'square', .13); },              // pager: bee-beep
       confirm: () => { tone(1760, .05, .03, 'square'); tone(2640, .07, .03, 'square', .07); }, // copied ✓
       buzz, key,
-      lamp: () => sample('light-switch.mp3', .9),                                           // the lamp's switch (recorded)
+      lamp: on => sample(on ? 'lamp-on.m4a' : 'lamp-off.m4a', .9),                          // the lamp's switch: its click on, its click off (recorded)
       blip: () => noiseBurst(.25, 6000, 2000, .15),
       tick: () => noiseBurst(.03, 4000, 3000, .04, 4),
       volume,
@@ -3554,7 +3554,7 @@ void main(){
       slide: () => noiseBurst(.42, 900, 1700, .16, 1.1),   // a cassette sliding in / out of its sleeve
       load: () => { clunk(); noiseBurst(.14, 700, 220, .24, .8); tone(92, .55, .028, 'sawtooth', .14); tone(138, .3, .012, 'sawtooth', .5); },   // the VCR takes the tape: clunk, then its motor
       eject: () => { snap(.3); noiseBurst(.32, 1600, 600, .14, 1); tone(110, .25, .02, 'sawtooth'); },   // the VCR pushing the tape out
-      unfold: () => sample('newspaper.mp3', .8, .85),        // a sheet opening out (recorded paper, a touch slower to fit the unfold)
+      unfold: () => sample('paper-unfold.mp3', .8),          // a sheet opening out (recorded paper)
       crumple: () => crinkle(.45, .32, 'out'),                // ...and balled up again, as long as the crumple
       shutter: () => { snap(.42); setTimeout(() => snap(.26), 45); },   // a camera's click-clack
       paper: () => { noiseBurst(.18, 3000, 5200, .24, 2); setTimeout(() => noiseBurst(.22, 4200, 2600, .2, 2), 420); setTimeout(() => noiseBurst(.16, 3600, 5000, .16, 2), 860); },

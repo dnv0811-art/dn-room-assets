@@ -538,7 +538,11 @@
   body.vcr-play.vp-close .vp-nav { opacity: 1; pointer-events: auto; transition-delay: .9s; }
   .vp-nav button { color: #fff; background: none; border: 0; padding: 0; opacity: .6; font: 500 13px/1 Inter, sans-serif; text-transform: uppercase; cursor: pointer; transition: opacity .2s; white-space: nowrap; }
   .vp-nav button:hover, .vp-nav .vp-stop { opacity: .9; }
-  body.vp-cam .vp-nav [data-vp="rew"], body.vp-cam .vp-nav [data-vp="ff"] { display: none; }
+  /* the camera on the TV: one button here (the other is the round badge on the glass) */
+  body.vp-cam .vp-nav [data-vp="rew"], body.vp-cam .vp-nav [data-vp="ff"], body.vp-cam .vp-nav [data-vp="play"] { display: none; }
+  .vp-stop .c, body.vp-cam .vp-stop .t { display: none; }
+  body.vp-cam .vp-stop .c { display: inline; }
+  .tag.cam { width: 84px; height: 84px; margin: -42px 0 0 -42px; font-size: 9px; }
   .vp-nav button:hover { opacity: 1; }
   /* the flying copy carries the sticker too (its frame is the in-hand one turned half round) */
   .ft .stick-pin { left: 82%; top: 82%; rotate: 94deg; }

@@ -644,11 +644,16 @@
     .tag { width: 112px; height: 112px; margin: -56px 0 0 -56px; font-size: 10px; }
     #loader .meta { font-size: 11px; }
   }
-  /* phones: the tape as large as the screen allows (sleeve + the cassette sticking out of it = 1.6 × --w),
-     the sticker moved in along the cassette so it isn't cut off by the screen's edge */
+  /* phones: the cover comes first. It takes most of the screen, the cassette only peeks out of it,
+     and the sticker sits on the cover's lower part (moved there from the cassette in the script) */
   @media (max-width: 700px) and (orientation: portrait) {
-    .tape-layer { --w: min(60vw, 42vh); }
-    .tcase .stick-pin, .ft .stick-pin { top: 34%; }
+    .tape-layer { --w: min(78vw, 50vh); }
+    .tcase { translate: calc(var(--w) * -.57) -50%; }
+    .tside { left: calc(50% - var(--w) * .57); }
+    .tape-layer.open .tcase .tape { transform: translate(calc(var(--w) * -.42), calc(var(--w) * -.13)) rotate(90deg); }
+    .tcase > .sticker { left: calc(var(--w) * .3); top: calc(var(--w) * 1.405); rotate: -6deg; z-index: 1; transition: transform .35s cubic-bezier(.3,1.6,.5,1), box-shadow .3s ease, opacity .2s ease; }
+    .tape-layer.launch .tcase > .sticker, .tape-layer.zoom .tcase > .sticker { opacity: 0; }
+    .ft .sticker { display: none; }
   }
   @media (max-height: 500px) and (orientation: landscape) { .tape-layer { --w: min(30vw, 54vh); } }
   /* touch screens: tapping the sleeve brings it up close, so the small print on it can be read */
@@ -664,6 +669,9 @@
     .tape-layer.zoom .tcase .tape { opacity: 0; transition: opacity .15s ease !important; }
     .tape-layer.zoom .tcase .sticker { pointer-events: none; }
     .tape-layer.zoom .tside { opacity: 0 !important; pointer-events: none; }
+  }
+  @media (pointer: coarse) and (max-width: 700px) and (orientation: portrait) {
+    .tape-layer.open.zoom .tcase { transform: translateX(calc(var(--w) * .07)) scale(var(--zk, 1.15)) !important; }
   }
   /* the narrowest phones: both rows have to fit side by side */
   @media (max-width: 360px) {

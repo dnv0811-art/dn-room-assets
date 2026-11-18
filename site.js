@@ -2087,6 +2087,10 @@ void main(){
     sticker.style.setProperty('--ry', (x * 22).toFixed(1) + 'deg'); sticker.style.setProperty('--rx', (-y * 26).toFixed(1) + 'deg');
   });
   sticker.addEventListener('pointerleave', () => { sticker.style.removeProperty('--rx'); sticker.style.removeProperty('--ry'); });
+  // upright phones: the cassette is mostly inside the sleeve, so the sticker goes on the cover
+  const stickerPin = sticker.parentNode, phoneTape = matchMedia('(max-width: 700px) and (orientation: portrait)');
+  const placeSticker = () => (phoneTape.matches ? tcase : stickerPin).appendChild(sticker);
+  placeSticker(); phoneTape.addEventListener('change', placeSticker);
   let tapeWheel = 0, tapeTouch = null;
   tapeLayer.addEventListener('touchstart', e => { tapeTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
   tapeLayer.addEventListener('touchend', e => {
@@ -3149,7 +3153,7 @@ void main(){
       try { return await DeviceOrientationEvent.requestPermission(); } catch (err) { return 'error'; }
     };
     const reportTilt = answer => {
-      if (answer === 'denied') { sayThought('Motion access is blocked in the browser settings.', 6000); return; }
+      if (answer === 'denied') { sayThought('Motion is off. Reopen Safari, then tap Allow.', 9000); return; }
       setTimeout(() => {
         if (tiltOff) return;
         sayThought(tiltSeen ? 'Tilt the phone to look around.' : 'This browser sends no motion data.', 5000);
@@ -3157,8 +3161,7 @@ void main(){
     };
     canvas.addEventListener('touchend', async () => {   // the first touch on the room
       if (!TILT_ASK || tiltSeen || tiltOff) return;
-      const answer = await askTilt();
-      if (answer === 'granted' || answer === 'denied') reportTilt(answer);
+      if (await askTilt() === 'granted') reportTilt('granted');   // said no earlier: no nagging here, the Tilt button explains
     }, { once: true, passive: true });
     tiltBtn.addEventListener('click', async () => {
       if (tiltOn) { tiltOff = true; setTilt(false); return; }
@@ -3198,10 +3201,13 @@ void main(){
     const n = thoughtEl.children.length;
     setTimeout(() => {
       thoughtEl.innerHTML = '';
+      let word = null;                            // letters are kept together by word, so a line only breaks between words
       [...text].forEach((c, i) => {
         const sp = document.createElement('span'); sp.className = 'ch'; sp.textContent = c;
         sp.style.transitionDelay = (i * 9) + 'ms';
-        thoughtEl.appendChild(sp);
+        if (c === ' ') { word = null; thoughtEl.appendChild(sp); return; }
+        if (!word) { word = document.createElement('span'); word.style.display = 'inline-block'; thoughtEl.appendChild(word); }
+        word.appendChild(sp);
       });
       thoughtEl.classList.remove('out');
       void thoughtEl.offsetWidth;

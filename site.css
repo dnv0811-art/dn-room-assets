@@ -630,8 +630,8 @@
     :root { --edge: 14px; }
     .ui, .tag { font-size: 11px; }
     .name { font-size: 20px; }
-    .topright .contacts { display: none; }
-    .topright { gap: 16px; }
+    .topright { gap: 14px; }
+    .sound .lbl { display: none; }   /* the icon says it: room for Contacts next to the name */
     .skills { gap: 10px; }
     /* the tape's and the VCR's controls take over the bottom row */
     body.tape-open .skills, body.tape-open .memories,
@@ -643,4 +643,10 @@
     .gal { bottom: 52px; gap: 16px; } .gal a { min-width: 0; } .gal .nm { max-width: 9em; overflow: hidden; text-overflow: ellipsis; }
     .tag { width: 112px; height: 112px; margin: -56px 0 0 -56px; font-size: 10px; }
     #loader .meta { font-size: 11px; }
+  }
+  /* the narrowest phones: both rows have to fit side by side */
+  @media (max-width: 360px) {
+    .name { font-size: 17px; }
+    .topright { gap: 10px; }
+    .skills span:last-child { display: none; }
   }

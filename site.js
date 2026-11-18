@@ -1249,7 +1249,7 @@ void main(){
   }
   // play a clip only while its channel is on the tube
   function tickVideos() {
-    if (VP.on) { if (!VP.cam && !VP.forceMute && VP.v.muted === Sound.isOn()) VP.v.muted = !Sound.isOn(); vpDraw(); }
+    if (VP.on) vpDraw();
     videoProj.forEach(e => {
       const onTube = G.onT > 0 && !(VP.shown && !G.active) && (e.i === G.cur || (G.active && e.i === G.next));
       if (onTube && e.v.paused) e.v.play().catch(() => {});
@@ -1531,7 +1531,6 @@ void main(){
     VP.on = true; VP.cam = false; VP.paused = false; VP.title = t.title; VP.seekUntil = 0; VP.ready = false;
     VP.blueUntil = 1e15; VP.trackUntil = 0;
     document.body.classList.add('vcr-play');
-    Sound.duck(true);
     // 1. the cassette is pulled the rest of the way out of its sleeve: still the real one, under the sleeve's edge
     const tapeEl = tapeLayer.querySelector('.tcase .tape');
     tcase.classList.add('pullout'); Sound.slide();
@@ -1558,14 +1557,15 @@ void main(){
           if (VP.noSrc || performance.now() - t1 > 6000) { VP.noSrc = false; vpEnd(true); openVideo(t.video, t.title); return; }
           VP.blueUntil = performance.now() + 450; VP.trackUntil = VP.blueUntil + 750; return setTimeout(go, 150);
         }
-        VP.forceMute = false; VP.v.play().catch(() => { VP.forceMute = true; VP.v.muted = true; VP.v.play().catch(() => {}); });
+        VP.v.play().catch(() => {});
       };
       setTimeout(go, 450);
     });
     const src = await tapeSrc(t.video);
     if (!VP.on) return;
     if (!src) { VP.noSrc = true; return; }
-    VP.v.src = src; VP.v.currentTime = 0; VP.v.muted = !Sound.isOn(); VP.v.load(); VP.ready = true;
+    VP.v.src = src; VP.v.currentTime = 0; VP.v.muted = true; VP.v.load();   // every video is silent: the room's own sound carries on
+    VP.ready = true;
     VP.v.play().then(() => { if (!VP.shown || VP.blueUntil > performance.now()) { VP.v.pause(); VP.v.currentTime = 0; } }).catch(() => {});   // unlock playback while the click still counts
   }
   /* ---- the cassette's flight into the set (and out again) ---- */
@@ -1666,7 +1666,7 @@ void main(){
   function vpReturn() {
     if (!VP.on || VP.back) return;
     VP.back = true;
-    VP.v.pause(); Sound.duck(false);
+    VP.v.pause();
     document.body.classList.remove('vcr-play');
     VP.blueUntil = 1e15; VP.trackUntil = 0;
     vpCamera(false);
@@ -1737,7 +1737,7 @@ void main(){
   }
   function vpEnd(quiet) {
     if (!VP.on) return;
-    VP.v.pause(); if (!VP.cam) Sound.duck(false);
+    VP.v.pause();
     document.body.classList.remove('vcr-play');
     if (VP.cam) {   // the camera goes off right away, not after the picture has rolled away
       const st = VP.v.srcObject; if (st) st.getTracks().forEach(t => t.stop());
@@ -2034,17 +2034,18 @@ void main(){
   const vidLayer = document.getElementById('vidLayer'), vidEl = document.getElementById('vidEl');
   function openVideo(src, title) {
     vidEl.src = encodeURI(ASSET(src)); vidEl.currentTime = 0;
-    vidEl.muted = !Sound.isOn(); vidLayer.setAttribute('aria-label', title + ' — video');
+    vidEl.muted = true; vidLayer.setAttribute('aria-label', title + ' — video');
     vidLayer.classList.add('open'); vidLayer.setAttribute('aria-hidden', 'false');
-    Sound.duck(true); Sound.swish(false);
-    setTimeout(() => vidEl.play().catch(() => { vidEl.muted = true; vidEl.play().catch(() => {}); }), 120);
+    Sound.swish(false);
+    setTimeout(() => vidEl.play().catch(() => {}), 120);
   }
   function closeVideo() {
     if (!vidLayer.classList.contains('open')) return;
     vidLayer.classList.remove('open'); vidLayer.setAttribute('aria-hidden', 'true');
-    vidEl.pause(); Sound.duck(false); Sound.swish(true);
+    vidEl.pause(); Sound.swish(true);
     setTimeout(() => { if (!vidLayer.classList.contains('open')) { vidEl.removeAttribute('src'); vidEl.load(); } }, 400);
   }
+  vidEl.addEventListener('volumechange', () => { if (!vidEl.muted) vidEl.muted = true; });   // its controls can't turn the sound on
   window.closeVideo = closeVideo; window.vidOpen = () => vidLayer.classList.contains('open');
   document.getElementById('vidClose').addEventListener('click', closeVideo);
   vidLayer.addEventListener('click', e => { if (!e.target.closest('.vid-box')) closeVideo(); });
@@ -3540,7 +3541,6 @@ void main(){
     }
     return {
       isOn: () => on,
-      duck: d => fadeMusic(d || !on ? 0 : MUSIC_VOL * vf(), d ? 500 : 1200),   // room music out of the way of a video
       whoosh: inward => noiseBurst(2.2, inward ? 300 : 1800, inward ? 1800 : 300, .25),
       swish: inward => noiseBurst(.35, inward ? 900 : 2600, inward ? 2600 : 900, .1, 1.4),   // something small flying in / out
       beep: () => { tone(2350, .07, .035); tone(2350, .07, .035, 'square', .13); },              // pager: bee-beep

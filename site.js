@@ -1,7 +1,7 @@
 /* Dmitrii Nesterov, the room (built from index.html). Needs window.DN_BASE = the folder these files are in. */
 (() => {
   const B = window.DN_BASE || '';
-  const markup = "<canvas id=\"scene\"></canvas>\n\n<div id=\"loader\" aria-live=\"polite\">\n  <canvas id=\"sigCv\"></canvas><canvas id=\"sigCrt\"></canvas>\n  <div class=\"osd ch\" id=\"sigCh\">CH 01</div>\n  <div class=\"osd mid\">\n    <div class=\"cells\" id=\"sigCells\" role=\"progressbar\" aria-label=\"Loading\"></div>\n  </div>\n  <div class=\"osd bl\" id=\"sigState\">AUTO SEARCH</div>\n</div>\n\n<div class=\"act-hint\" id=\"actHint\" aria-hidden=\"true\"></div>\n<div class=\"tape-layer\" id=\"tapeLayer\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Project tape\" aria-hidden=\"true\">\n  <div class=\"tside\" aria-hidden=\"true\"></div><div class=\"tside\" aria-hidden=\"true\"></div><div class=\"tside\" aria-hidden=\"true\"></div>\n  <div class=\"tcase\">\n    <div class=\"tape\"><img src=\"projects/vhs-c.png\" alt=\"\"><div class=\"label\"><span id=\"tapeLabel\"></span></div><div class=\"stick-pin\"><button class=\"sticker\" id=\"tapeSticker\" type=\"button\"><span>Play the site</span><svg class=\"arr\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4.5 19.2c3.1-3.4 6.6-7.6 13.6-13.9M10.6 5.6c2.4-.5 5-.6 7.6-.4.4 2.6.2 5.2-.3 7.9\"/></svg></button></div></div>\n    <div class=\"sleeve\" id=\"tapeSleeve\"></div>\n  </div>\n  <div class=\"tape-nav\"><button id=\"tapePrev\" aria-label=\"Previous tape\">\u2190 Prev</button><button class=\"tape-close\" id=\"tapeClose\">Put it back \u2715</button><button id=\"tapeNext\" aria-label=\"Next tape\">Next \u2192</button></div>\n</div>\n<div class=\"vid-layer\" id=\"vidLayer\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Project video\" aria-hidden=\"true\">\n  <div class=\"vid-box\"><video id=\"vidEl\" playsinline controls preload=\"none\"></video></div>\n  <button class=\"vid-close\" id=\"vidClose\" type=\"button\">Close \u2715</button>\n</div>\n<div class=\"pager-layer\" id=\"pagerLayer\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Contacts\" aria-hidden=\"true\">\n  <div class=\"pager\" id=\"pager\">\n    <img src=\"objects/pager-c.png\" alt=\"\" id=\"pagerImg\">\n    <div class=\"pg-lcd\" aria-live=\"polite\"><div class=\"l1\"><b id=\"pgHead\"></b><b id=\"pgIdx\"></b></div><div class=\"l2\" id=\"pgLine\"><span id=\"pgText\"></span></div></div>\n    <i class=\"pg-led\" aria-hidden=\"true\"></i>\n    <button class=\"pg-btn\" data-a=\"prev\" style=\"left:9.9%;top:55.2%;width:20.6%;height:11%\" aria-label=\"Previous contact\"></button>\n    <button class=\"pg-btn\" data-a=\"next\" style=\"left:30.9%;top:55.2%;width:20.1%;height:11%\" aria-label=\"Next contact\"></button>\n    <button class=\"pg-btn\" data-a=\"copy\" style=\"left:51.5%;top:55.2%;width:22%;height:11%\" aria-label=\"Copy\"></button>\n    <button class=\"pg-btn\" data-a=\"prev\" style=\"left:81%;top:10.3%;width:9.6%;height:26.4%\" aria-label=\"Previous contact\"></button>\n    <button class=\"pg-btn\" data-a=\"next\" style=\"left:81%;top:38%;width:9.6%;height:26.2%\" aria-label=\"Next contact\"></button>\n    <button class=\"pg-btn\" data-a=\"open\" style=\"left:73.5%;top:73.7%;width:20.1%;height:16.7%\" aria-label=\"Open\"></button>\n    <button class=\"pager-close\" id=\"pagerClose\">Put away \u2715</button>\n  </div>\n</div>\n<div style=\"--i:0\" class=\"ui name\" id=\"logo\" aria-label=\"Find my name: D______ N_______\">D______ N_______</div>\n<div style=\"--i:1\" class=\"ui status\"><span class=\"main\"><span class=\"lead\">Open for new</span><span class=\"swap\" id=\"statusWord\">missions</span></span><span class=\"alt\">Esc \u2014 back to the room</span></div>\n<div style=\"--i:2\" class=\"ui topright\">\n  <a class=\"contacts\" href=\"mailto:nesterov.spain@gmail.com\">Contacts</a>\n  <button class=\"sound\" id=\"sound\" aria-pressed=\"false\">\n    <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">\n      <path d=\"M4 9.5h3.2L12 5.5v13l-4.8-4H4z\"/>\n      <path class=\"w w1\" d=\"M15.5 9.2a4 4 0 0 1 0 5.6\"/>\n      <path class=\"w w2\" d=\"M18 6.8a7.5 7.5 0 0 1 0 10.4\"/>\n      <path class=\"x\" d=\"M16 10l4 4M20 10l-4 4\"/>\n    </svg><span class=\"lbl\">Sound off</span>\n  </button>\n</div>\n<div style=\"--i:6\" class=\"ui side l\" id=\"clockBcn\">BCN 00:00:00</div>\n<button style=\"--i:3\" class=\"ui side r legal-link\" id=\"legalLink\" aria-haspopup=\"dialog\" aria-label=\"Intellectual property notice\">IP notice</button>\n<div style=\"--i:5\" class=\"ui skills\"><span>Creative low_code<br>developer</span><span>UX/UI designer</span></div>\n<div class=\"ui thought\" id=\"thought\" aria-live=\"polite\"></div>\n<button style=\"--i:4\" class=\"ui memories\" id=\"memories\" aria-haspopup=\"dialog\" aria-label=\"Open memories\">\n  <span class=\"mem-pic\"><img alt=\"\" id=\"memImg\"><i class=\"empty\"></i></span>\n  <span class=\"mem-txt\"><i id=\"memCount\">0/17</i> Memories found <span class=\"mem-arr\">\u2197</span></span>\n</button>\n<div class=\"nb-layer\" id=\"nbLayer\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Memories\" aria-hidden=\"true\">\n  <div class=\"nb\" id=\"nb\">\n    <div class=\"nb-board l\"></div><div class=\"nb-board r\"></div>\n    <div class=\"nb-page l\" id=\"nbL\"></div>\n    <div class=\"nb-page r\" id=\"nbR\"></div>\n    <div class=\"nb-spine\" aria-hidden=\"true\"></div>\n    <div class=\"nb-shade\" id=\"nbShade\" aria-hidden=\"true\"></div>\n    <canvas class=\"nb-cover\" id=\"nbCover\" aria-hidden=\"true\"></canvas>\n    <button class=\"nb-btn nb-prev\" id=\"nbPrev\" aria-label=\"Previous pages\">&larr; back</button>\n    <button class=\"nb-btn nb-next\" id=\"nbNext\" aria-label=\"Next pages\">next &rarr;</button>\n    <button class=\"nb-close\" id=\"nbClose\">Put away \u2715</button>\n  </div>\n</div>\n<div class=\"legal\" id=\"legal\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"legalTitle\" aria-hidden=\"true\">\n  <div class=\"legal-card\">\n    <button class=\"legal-close\" id=\"legalClose\">Close \u2715</button>\n    <div class=\"kicker\">Intellectual property notice</div>\n    <h2 id=\"legalTitle\">A note on the objects</h2>\n    <p>This room is a personal creative space, a visual representation of the designer's interests, inspirations, and cultural influences.</p>\n    <p>Some of the objects featured here are inspired by, reference, or depict products, characters, brands, artworks, and fictional universes created by their respective owners.</p>\n    <p>All trademarks, character names, product designs, and referenced intellectual property belong to their respective owners. Their appearance in this portfolio is intended solely to communicate personal interests, creative inspiration, and the stories behind the objects.</p>\n    <p>No affiliation, sponsorship, endorsement, or partnership with any of the referenced brands, creators, or rights holders is claimed or implied.</p>\n    <p>We sincerely appreciate the creators, artists, designers, studios, and companies whose work has shaped the culture and inspired this project.</p>\n    <p>The REC button on the TV can show your camera on its screen. That only happens after you allow it in your browser; the picture stays on your device, it is never recorded, stored or sent anywhere, and the camera turns off as soon as you stop it.</p>\n    <p>All rights to third-party intellectual property remain with their respective owners. If you are a rights holder and have concerns regarding any material featured here, please <a href=\"#\" id=\"legalContact\">contact us</a>.</p>\n  </div>\n</div>\n<nav class=\"ui gal\" aria-label=\"Projects\">\n  <button id=\"prev\" aria-label=\"Previous project\">\u2190 Prev</button>\n  <a id=\"gLink\" href=\"#\" aria-label=\"Check out the project\"><span class=\"idx\" id=\"gIdx\">01 / 05</span><span class=\"nm\" id=\"gName\">\u2014</span><span class=\"arr\">\u2197</span></a>\n  <button id=\"next\" aria-label=\"Next project\">Next \u2192</button>\n</nav>\n<div class=\"paper-layer\" id=\"paper\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Note\" aria-hidden=\"true\">\n  <div class=\"sr-only\" id=\"paperText\"></div>\n  <div class=\"polaroid\" id=\"polaroid\" aria-hidden=\"true\">\n    <div class=\"pl-photo\"><img alt=\"\" id=\"plImg\"><i class=\"dev\"></i></div>\n    <div class=\"pl-caption\"><h3 id=\"plTitle\"></h3><div id=\"plText\"></div></div>\n  </div>\n  <div class=\"gold-pl\" id=\"goldPl\" aria-hidden=\"true\"><i id=\"goldPlPhoto\"></i></div>\n  <div class=\"paper-obj\" id=\"paperObj\"><img alt=\"\" id=\"paperObjImg\">\n    <div class=\"mini-tv\" aria-hidden=\"true\">\n      <img class=\"mt-body\" src=\"objects/tv.png\" alt=\"\">\n      <div class=\"mt-screen\"><img alt=\"\" id=\"miniTvImg\"><i class=\"mt-scan\"></i><i class=\"mt-roll\"></i><i class=\"mt-glare\"></i><i class=\"mt-reflect\"></i><span class=\"mt-osd\">PLAY &#9654;</span></div>\n    </div>\n  </div>\n  <div class=\"paper-actions\" id=\"paperActions\">\n    <a class=\"paper-save\" id=\"paperSave\" download=\"Dmitrii-Nesterov.vcf\">Save contact \u2193</a>\n    <button class=\"paper-close\" id=\"paperClose\">Fold it back \u2715</button>\n  </div>\n</div>\n\n\n\n<nav class=\"vp-nav\" id=\"vpNav\" aria-label=\"Tape controls\"><button data-vp=\"rew\" aria-label=\"Rewind 10 seconds\">\u25c0\u25c0 Rew</button><button data-vp=\"play\" id=\"vpPlay\">\u275a\u275a Pause</button><button data-vp=\"ff\" aria-label=\"Fast forward 10 seconds\">FF \u25b6\u25b6</button><button data-vp=\"stop\" class=\"vp-stop\">Eject \u23cf</button></nav>\n<div class=\"ft-wrap\" id=\"ftWrap\" aria-hidden=\"true\"><div class=\"ft-gap\" id=\"ftGap\"></div><div class=\"ft\" id=\"ft\"><div class=\"ft-top\"><img src=\"projects/vhs-c.png\" alt=\"\"><div class=\"label\"><span id=\"ftLabel\"></span></div><div class=\"stick-pin\"><span class=\"sticker\" id=\"ftSticker\"><span>Play the site</span><svg class=\"arr\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4.5 19.2c3.1-3.4 6.6-7.6 13.6-13.9M10.6 5.6c2.4-.5 5-.6 7.6-.4.4 2.6.2 5.2-.3 7.9\"/></svg></span></div></div><div class=\"ft-front\"></div></div></div>\n<div class=\"tv-tip\" id=\"tvTip\" aria-hidden=\"true\"><div class=\"card\">Push the buttons</div></div>\n<div class=\"tag\" id=\"tag\"><svg viewBox=\"0 0 100 100\" aria-hidden=\"true\"><path id=\"tagRing\"/></svg><i id=\"tagText\">Explore<br>the TV</i></div>";
+  const markup = "<canvas id=\"scene\"></canvas>\n\n<div id=\"loader\" aria-live=\"polite\">\n  <canvas id=\"sigCv\"></canvas><canvas id=\"sigCrt\"></canvas>\n  <div class=\"osd ch\" id=\"sigCh\">CH 01</div>\n  <div class=\"osd mid\">\n    <div class=\"cells\" id=\"sigCells\" role=\"progressbar\" aria-label=\"Loading\"></div>\n  </div>\n  <div class=\"osd bl\" id=\"sigState\">AUTO SEARCH</div>\n</div>\n\n<div class=\"act-hint\" id=\"actHint\" aria-hidden=\"true\"></div>\n<div class=\"tape-layer\" id=\"tapeLayer\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Project tape\" aria-hidden=\"true\">\n  <div class=\"tside\" aria-hidden=\"true\"></div><div class=\"tside\" aria-hidden=\"true\"></div><div class=\"tside\" aria-hidden=\"true\"></div>\n  <div class=\"tcase\">\n    <div class=\"tape\"><img src=\"projects/vhs-c.png\" alt=\"\"><div class=\"label\"><span id=\"tapeLabel\"></span></div><div class=\"stick-pin\"><button class=\"sticker\" id=\"tapeSticker\" type=\"button\"><span>Play the site</span><svg class=\"arr\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4.5 19.2c3.1-3.4 6.6-7.6 13.6-13.9M10.6 5.6c2.4-.5 5-.6 7.6-.4.4 2.6.2 5.2-.3 7.9\"/></svg></button></div></div>\n    <div class=\"sleeve\" id=\"tapeSleeve\"></div>\n  </div>\n  <div class=\"tape-nav\"><button id=\"tapePrev\" aria-label=\"Previous tape\">\u2190 Prev</button><button class=\"tape-close\" id=\"tapeClose\">Put it back \u2715</button><button id=\"tapeNext\" aria-label=\"Next tape\">Next \u2192</button></div>\n</div>\n<div class=\"vid-layer\" id=\"vidLayer\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Project video\" aria-hidden=\"true\">\n  <div class=\"vid-box\"><video id=\"vidEl\" playsinline controls preload=\"none\"></video></div>\n  <button class=\"vid-close\" id=\"vidClose\" type=\"button\">Close \u2715</button>\n</div>\n<div class=\"pager-layer\" id=\"pagerLayer\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Contacts\" aria-hidden=\"true\">\n  <div class=\"pager\" id=\"pager\">\n    <img src=\"objects/pager-c.png\" alt=\"\" id=\"pagerImg\">\n    <div class=\"pg-lcd\" aria-live=\"polite\"><div class=\"l1\"><b id=\"pgHead\"></b><b id=\"pgIdx\"></b></div><div class=\"l2\" id=\"pgLine\"><span id=\"pgText\"></span></div></div>\n    <i class=\"pg-led\" aria-hidden=\"true\"></i>\n    <button class=\"pg-btn\" data-a=\"prev\" style=\"left:9.9%;top:55.2%;width:20.6%;height:11%\" aria-label=\"Previous contact\"></button>\n    <button class=\"pg-btn\" data-a=\"next\" style=\"left:30.9%;top:55.2%;width:20.1%;height:11%\" aria-label=\"Next contact\"></button>\n    <button class=\"pg-btn\" data-a=\"copy\" style=\"left:51.5%;top:55.2%;width:22%;height:11%\" aria-label=\"Copy\"></button>\n    <button class=\"pg-btn\" data-a=\"prev\" style=\"left:81%;top:10.3%;width:9.6%;height:26.4%\" aria-label=\"Previous contact\"></button>\n    <button class=\"pg-btn\" data-a=\"next\" style=\"left:81%;top:38%;width:9.6%;height:26.2%\" aria-label=\"Next contact\"></button>\n    <button class=\"pg-btn\" data-a=\"open\" style=\"left:73.5%;top:73.7%;width:20.1%;height:16.7%\" aria-label=\"Open\"></button>\n    <button class=\"pager-close\" id=\"pagerClose\">Put away \u2715</button>\n  </div>\n</div>\n<div style=\"--i:0\" class=\"ui name\" id=\"logo\" aria-label=\"Find my name: D______ N_______\">D______ N_______</div>\n<div style=\"--i:1\" class=\"ui status\"><span class=\"main\"><span class=\"lead\">Open for new</span><span class=\"swap\" id=\"statusWord\">missions</span></span><span class=\"alt\">Esc \u2014 back to the room</span></div>\n<div style=\"--i:2\" class=\"ui topright\">\n  <a class=\"contacts\" href=\"mailto:nesterov.spain@gmail.com\">Contacts</a>\n  <button class=\"tilt\" id=\"tilt\" aria-pressed=\"false\">Tilt off</button>\n  <button class=\"sound\" id=\"sound\" aria-pressed=\"false\">\n    <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">\n      <path d=\"M4 9.5h3.2L12 5.5v13l-4.8-4H4z\"/>\n      <path class=\"w w1\" d=\"M15.5 9.2a4 4 0 0 1 0 5.6\"/>\n      <path class=\"w w2\" d=\"M18 6.8a7.5 7.5 0 0 1 0 10.4\"/>\n      <path class=\"x\" d=\"M16 10l4 4M20 10l-4 4\"/>\n    </svg><span class=\"lbl\">Sound off</span>\n  </button>\n</div>\n<div style=\"--i:6\" class=\"ui side l\" id=\"clockBcn\">BCN 00:00:00</div>\n<button style=\"--i:3\" class=\"ui side r legal-link\" id=\"legalLink\" aria-haspopup=\"dialog\" aria-label=\"Intellectual property notice\">IP notice</button>\n<div style=\"--i:5\" class=\"ui skills\"><span>Creative low_code<br>developer</span><span>UX/UI designer</span></div>\n<div class=\"ui thought\" id=\"thought\" aria-live=\"polite\"></div>\n<button style=\"--i:4\" class=\"ui memories\" id=\"memories\" aria-haspopup=\"dialog\" aria-label=\"Open memories\">\n  <span class=\"mem-pic\"><img alt=\"\" id=\"memImg\"><i class=\"empty\"></i></span>\n  <span class=\"mem-txt\"><i id=\"memCount\">0/17</i> Memories found <span class=\"mem-arr\">\u2197</span></span>\n</button>\n<div class=\"nb-layer\" id=\"nbLayer\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Memories\" aria-hidden=\"true\">\n  <div class=\"nb\" id=\"nb\">\n    <div class=\"nb-board l\"></div><div class=\"nb-board r\"></div>\n    <div class=\"nb-page l\" id=\"nbL\"></div>\n    <div class=\"nb-page r\" id=\"nbR\"></div>\n    <div class=\"nb-spine\" aria-hidden=\"true\"></div>\n    <div class=\"nb-shade\" id=\"nbShade\" aria-hidden=\"true\"></div>\n    <canvas class=\"nb-cover\" id=\"nbCover\" aria-hidden=\"true\"></canvas>\n    <button class=\"nb-btn nb-prev\" id=\"nbPrev\" aria-label=\"Previous pages\">&larr; back</button>\n    <button class=\"nb-btn nb-next\" id=\"nbNext\" aria-label=\"Next pages\">next &rarr;</button>\n    <button class=\"nb-close\" id=\"nbClose\">Put away \u2715</button>\n  </div>\n</div>\n<div class=\"legal\" id=\"legal\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"legalTitle\" aria-hidden=\"true\">\n  <div class=\"legal-card\">\n    <button class=\"legal-close\" id=\"legalClose\">Close \u2715</button>\n    <div class=\"kicker\">Intellectual property notice</div>\n    <h2 id=\"legalTitle\">A note on the objects</h2>\n    <p>This room is a personal creative space, a visual representation of the designer's interests, inspirations, and cultural influences.</p>\n    <p>Some of the objects featured here are inspired by, reference, or depict products, characters, brands, artworks, and fictional universes created by their respective owners.</p>\n    <p>All trademarks, character names, product designs, and referenced intellectual property belong to their respective owners. Their appearance in this portfolio is intended solely to communicate personal interests, creative inspiration, and the stories behind the objects.</p>\n    <p>No affiliation, sponsorship, endorsement, or partnership with any of the referenced brands, creators, or rights holders is claimed or implied.</p>\n    <p>We sincerely appreciate the creators, artists, designers, studios, and companies whose work has shaped the culture and inspired this project.</p>\n    <p>The REC button on the TV can show your camera on its screen. That only happens after you allow it in your browser; the picture stays on your device, it is never recorded, stored or sent anywhere, and the camera turns off as soon as you stop it.</p>\n    <p>All rights to third-party intellectual property remain with their respective owners. If you are a rights holder and have concerns regarding any material featured here, please <a href=\"#\" id=\"legalContact\">contact us</a>.</p>\n  </div>\n</div>\n<nav class=\"ui gal\" aria-label=\"Projects\">\n  <button id=\"prev\" aria-label=\"Previous project\">\u2190 Prev</button>\n  <a id=\"gLink\" href=\"#\" aria-label=\"Check out the project\"><span class=\"idx\" id=\"gIdx\">01 / 05</span><span class=\"nm\" id=\"gName\">\u2014</span><span class=\"arr\">\u2197</span></a>\n  <button id=\"next\" aria-label=\"Next project\">Next \u2192</button>\n</nav>\n<div class=\"paper-layer\" id=\"paper\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Note\" aria-hidden=\"true\">\n  <div class=\"sr-only\" id=\"paperText\"></div>\n  <div class=\"polaroid\" id=\"polaroid\" aria-hidden=\"true\">\n    <div class=\"pl-photo\"><img alt=\"\" id=\"plImg\"><i class=\"dev\"></i></div>\n    <div class=\"pl-caption\"><h3 id=\"plTitle\"></h3><div id=\"plText\"></div></div>\n  </div>\n  <div class=\"gold-pl\" id=\"goldPl\" aria-hidden=\"true\"><i id=\"goldPlPhoto\"></i></div>\n  <div class=\"paper-obj\" id=\"paperObj\"><img alt=\"\" id=\"paperObjImg\">\n    <div class=\"mini-tv\" aria-hidden=\"true\">\n      <img class=\"mt-body\" src=\"objects/tv.png\" alt=\"\">\n      <div class=\"mt-screen\"><img alt=\"\" id=\"miniTvImg\"><i class=\"mt-scan\"></i><i class=\"mt-roll\"></i><i class=\"mt-glare\"></i><i class=\"mt-reflect\"></i><span class=\"mt-osd\">PLAY &#9654;</span></div>\n    </div>\n  </div>\n  <div class=\"paper-actions\" id=\"paperActions\">\n    <a class=\"paper-save\" id=\"paperSave\" download=\"Dmitrii-Nesterov.vcf\">Save contact \u2193</a>\n    <button class=\"paper-close\" id=\"paperClose\">Fold it back \u2715</button>\n  </div>\n</div>\n\n\n\n<nav class=\"vp-nav\" id=\"vpNav\" aria-label=\"Tape controls\"><button data-vp=\"rew\" aria-label=\"Rewind 10 seconds\">\u25c0\u25c0 Rew</button><button data-vp=\"play\" id=\"vpPlay\">\u275a\u275a Pause</button><button data-vp=\"ff\" aria-label=\"Fast forward 10 seconds\">FF \u25b6\u25b6</button><button data-vp=\"stop\" class=\"vp-stop\">Eject \u23cf</button></nav>\n<div class=\"ft-wrap\" id=\"ftWrap\" aria-hidden=\"true\"><div class=\"ft-gap\" id=\"ftGap\"></div><div class=\"ft\" id=\"ft\"><div class=\"ft-top\"><img src=\"projects/vhs-c.png\" alt=\"\"><div class=\"label\"><span id=\"ftLabel\"></span></div><div class=\"stick-pin\"><span class=\"sticker\" id=\"ftSticker\"><span>Play the site</span><svg class=\"arr\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4.5 19.2c3.1-3.4 6.6-7.6 13.6-13.9M10.6 5.6c2.4-.5 5-.6 7.6-.4.4 2.6.2 5.2-.3 7.9\"/></svg></span></div></div><div class=\"ft-front\"></div></div></div>\n<div class=\"tv-tip\" id=\"tvTip\" aria-hidden=\"true\"><div class=\"card\">Push the buttons</div></div>\n<div class=\"tag\" id=\"tag\"><svg viewBox=\"0 0 100 100\" aria-hidden=\"true\"><path id=\"tagRing\"/></svg><i id=\"tagText\">Explore<br>the TV</i></div>";
   // the room's markup goes straight into <body> (not into Tilda's block), its pictures from the asset folder
   document.body.insertAdjacentHTML('afterbegin', markup.replace(/(src|href)="((?:objects|projects)\/)/g, '$1="' + B + '$2'));
 })();
@@ -1296,10 +1296,12 @@ void main(){
   const S = {
     zoom: 1, zoomFrom: 1, zoomTo: 1, zT0: 0, zDur: 2600,
     mouse: [0, 0], mouseT: [0, 0], pan: [0, 0], panT: [0, 0],
+    tilt: [0, 0], tiltT: [0, 0],                 // phones: how far tilting the device moves the view
     dist: .32, reveal: 0, revealT0: 0, zoomed: false, started: false,
     tv: false,                                   // zoomed in on the TV (gallery) vs. just leaning in to look at a spot
     fc: null, fcFrom: null, fcTo: null,          // where the camera looks (image uv), animated with the zoom
   };
+  const TOUCH = matchMedia('(pointer: coarse)').matches;   // phones and tablets: drag to look around, tap to open
   const ROOM_ZOOM = () => Math.min(2, Math.max(1.5, zoomIn() * .85));   // leaning in to look at any spot
   const BASE_DIST = .3;   // lens bulge: gentler, so things at the edges don't swim while turning
   const OVERSCAN = .9;    // how much of the picture the resting frame shows (the rest is turning room)
@@ -1331,7 +1333,7 @@ void main(){
     if (sa > ia) hy = .5 * ia / sa; else hx = .5 * sa / ia;
     hx *= OVERSCAN / S.zoom; hy *= OVERSCAN / S.zoom;
     let [cx, cy] = S.fc || HOME;
-    if (!noPan) { cx += S.pan[0]; cy += S.pan[1]; }
+    if (!noPan) { cx += S.pan[0] + S.tilt[0]; cy += S.pan[1] + S.tilt[1]; }
     cx = Math.min(Math.max(cx, hx + .01), 1 - hx - .01);
     cy = Math.min(Math.max(cy, hy + .01), 1 - hy - .01);
     return { hx, hy, cx, cy };
@@ -1461,7 +1463,8 @@ void main(){
   // z > 1 zooms in: on the TV by default (opens the gallery), or on any spot of the room (focus = image uv)
   function zoomTo(z, focus) {
     if (VP.on) vpEnd(true);   // walking away from the set: the tape just stops
-    const v = view(true);
+    const v = view(!TOUCH);   // on a phone the camera may be anywhere in the room: set off from where it is looking
+    if (TOUCH) { S.pan = [0, 0]; S.panT = [0, 0]; S.tilt = [0, 0]; }
     S.fcFrom = [v.cx, v.cy]; S.fc = S.fcFrom.slice();
     const wasTv = S.tv;
     S.tv = z > 1 && !focus;
@@ -2940,6 +2943,7 @@ void main(){
   }
 
   canvas.addEventListener('mousemove', e => {
+    if (TOUCH) return;   // a tap sends a fake mouse move: it must not swing the camera or leave a hover badge behind
     S.mouseT = [ (e.clientX / innerWidth) * 2 - 1, -((e.clientY / innerHeight) * 2 - 1) ];
     if (!S.started) return;
     let hot, label = '', it = null;
@@ -2970,8 +2974,20 @@ void main(){
     tagPos.tx = e.clientX; tagPos.ty = e.clientY;
   });
   canvas.addEventListener('mouseleave', () => { if (hovered && hovered.hover) releaseThought(hovered.hover); hint(''); S.mouseT = [0, 0]; S.onSet = false; tag.classList.remove('show'); G.hoverT = 0; hovered = null; canvas.classList.remove('hand'); });
+  // a fingertip is much bigger than a cursor: a tap that just misses something counts as a tap on it
+  function snapTap(e) {
+    const atSet = p => S.zoomed && document.body.classList.contains('gallery') && (overScreen(p) || vcrAt(p));
+    const hit = p => { if (atSet(p)) return true; const it = itemAt(p); return !!it && !(S.tv && it.id === 'tv'); };
+    if (hit(e)) return e;
+    for (const r of [14, 28]) for (let i = 0; i < 8; i++) {
+      const a = i / 8 * Math.PI * 2, p = { clientX: e.clientX + Math.cos(a) * r, clientY: e.clientY + Math.sin(a) * r };
+      if (hit(p)) return p;
+    }
+    return e;
+  }
   canvas.addEventListener('click', e => {
     if (!S.started || performance.now() - dragEnd < 400) return;
+    if (TOUCH) e = snapTap(e);
     if (S.zoomed) {
       const btn = vcrAt(e);
       if (btn) { Sound.key(); vcrPress(btn); tvTipUsed(); }   // a light key click; channel changes add their own tape clunk
@@ -2988,6 +3004,7 @@ void main(){
     } else {
       const it = itemAt(e);
       if (!it) {   // the magnifier works anywhere: lean in on that spot of the room
+        if (TOUCH) return;   // phones look around by dragging; a missed tap shouldn't throw the camera forward
         zoomTo(ROOM_ZOOM(), screenToView(e.clientX / innerWidth, e.clientY / innerHeight));
         return;
       }
@@ -3052,27 +3069,85 @@ void main(){
     panBy(dx * k, dy * k * (IMG_W / IMG_H) * .7);
   }, { passive: false });
 
-  // touch: swipe on the glass flips sites, drag elsewhere looks around
+  // touch: swipe on the glass flips sites, drag anywhere else moves through the room (no need to zoom first);
+  // the room follows the finger one to one, and a few pixels of jitter still count as a tap
   let touch = null, dragEnd = 0;
   canvas.addEventListener('touchstart', e => {
     const t = e.touches[0];
-    touch = { x: t.clientX, y: t.clientY, lx: t.clientX, ly: t.clientY, glass: S.zoomed && overScreen(t) };
+    touch = { x: t.clientX, y: t.clientY, lx: t.clientX, ly: t.clientY, moved: false,
+      glass: S.zoomed && document.body.classList.contains('gallery') && overScreen(t) };
   }, { passive: true });
   canvas.addEventListener('touchmove', e => {
-    if (!touch || !S.zoomed || touch.glass) return;
+    if (!touch || touch.glass || !S.started) return;
     const t = e.touches[0];
-    const k = .0016 / S.zoom;
-    panBy(-(t.clientX - touch.lx) * k, -(t.clientY - touch.ly) * k * (IMG_W / IMG_H) * .7);
-    touch.lx = t.clientX; touch.ly = t.clientY; touch.moved = true;
+    if (!touch.moved) {
+      if (Math.hypot(t.clientX - touch.x, t.clientY - touch.y) < 10) return;
+      touch.moved = true; touch.lx = t.clientX; touch.ly = t.clientY;
+    }
+    const v = view(true);
+    panBy(-(t.clientX - touch.lx) * 2 * v.hx / innerWidth, -(t.clientY - touch.ly) * 2 * v.hy / innerHeight);
+    touch.lx = t.clientX; touch.ly = t.clientY;
   }, { passive: true });
   canvas.addEventListener('touchend', e => {
-    if (!touch) return; if (touch.moved) dragEnd = performance.now(); const dy = e.changedTouches[0].clientY - touch.y; const g = touch.glass; touch = null;
-    if (g && Math.abs(dy) > 50) go(dy < 0 ? 1 : -1);
+    if (!touch) return;
+    const c = e.changedTouches[0], dx = c.clientX - touch.x, dy = c.clientY - touch.y, g = touch.glass;
+    if (touch.moved) dragEnd = performance.now();
+    touch = null;
+    if (g && Math.max(Math.abs(dx), Math.abs(dy)) > 50) {
+      dragEnd = performance.now();
+      const d = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+      go(d < 0 ? 1 : -1);
+    }
   }, { passive: true });
-  addEventListener('deviceorientation', e => {
-    if (e.gamma == null) return;
-    S.mouseT = [ Math.max(-1, Math.min(1, e.gamma / 25)), Math.max(-1, Math.min(1, (e.beta - 45) / 25)) ];
-  });
+  canvas.addEventListener('touchcancel', () => { touch = null; }, { passive: true });
+
+  // tilting the phone moves the view too. The way it is being held counts as "straight ahead", and that slowly
+  // follows the hand, so the room works at any angle. iPhones only give the sensor after a tap: the Tilt button.
+  const tiltBtn = document.getElementById('tilt');
+  const TILT_ASK = window.DeviceOrientationEvent && DeviceOrientationEvent.requestPermission;
+  let tiltOn = false, tiltZero = null;
+  function setTilt(on) {
+    tiltOn = on; tiltZero = null;
+    tiltBtn.textContent = on ? 'Tilt on' : 'Tilt off';
+    tiltBtn.setAttribute('aria-pressed', on);
+    if (!on) { S.tiltT = [0, 0]; S.mouseT = [0, 0]; }
+  }
+  function onTilt(e) {
+    if (e.gamma == null || e.beta == null) return;
+    if (!TILT_ASK && !document.body.classList.contains('can-tilt')) { document.body.classList.add('can-tilt'); setTilt(true); }   // this phone has the sensor
+    if (!tiltOn) return;
+    const a = ((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0) % 360;
+    const x = a === 90 ? e.beta : a === 270 || a === -90 ? -e.beta : e.gamma;
+    const y = a === 90 ? -e.gamma : a === 270 || a === -90 ? e.gamma : e.beta;
+    if (!tiltZero || Math.abs(x - tiltZero[0]) > 50 || Math.abs(y - tiltZero[1]) > 50) tiltZero = [x, y];
+    tiltZero[0] += (x - tiltZero[0]) * .0015; tiltZero[1] += (y - tiltZero[1]) * .0015;
+    const nx = Math.max(-1, Math.min(1, (x - tiltZero[0]) / 18)), ny = Math.max(-1, Math.min(1, (y - tiltZero[1]) / 18));
+    const v = view(true);
+    S.tiltT = [nx * Math.min(.1, Math.max(0, v.cx - v.hx), Math.max(0, 1 - v.cx - v.hx)),
+               -ny * Math.min(.05, Math.max(0, v.cy - v.hy), Math.max(0, 1 - v.cy - v.hy))];
+    S.mouseT = [nx * .5, ny * .5];
+  }
+  if (TOUCH && window.DeviceOrientationEvent) {
+    let listening = !TILT_ASK;
+    if (TILT_ASK) {
+      document.body.classList.add('can-tilt');
+      // already allowed, or no question needed on this phone: just turn it on (without a tap iPhones refuse quietly)
+      DeviceOrientationEvent.requestPermission().then(answer => {
+        if (answer !== 'granted' || listening) return;
+        addEventListener('deviceorientation', onTilt); listening = true; setTilt(true);
+      }).catch(() => {});
+    } else addEventListener('deviceorientation', onTilt);
+    tiltBtn.addEventListener('click', async () => {
+      if (tiltOn) { setTilt(false); return; }
+      if (!listening) {
+        let answer = 'denied';
+        try { answer = await DeviceOrientationEvent.requestPermission(); } catch (err) {}
+        if (answer !== 'granted') { document.body.classList.remove('can-tilt'); return; }
+        addEventListener('deviceorientation', onTilt); listening = true;
+      }
+      setTilt(true);
+    });
+  }
 
   // live Barcelona clock (right edge)
   const fmt = tz => new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -3175,8 +3250,15 @@ void main(){
 
     tagPos.x += (tagPos.tx - tagPos.x) * .18; tagPos.y += (tagPos.ty - tagPos.y) * .18;
     tag.style.transform = `translate(${tagPos.x}px, ${tagPos.y}px)`;
-    S.pan[0] += (S.panT[0] - S.pan[0]) * .08;
-    S.pan[1] += (S.panT[1] - S.pan[1]) * .08;
+    const panK = TOUCH ? .22 : .08;              // under a finger the room has to keep up
+    S.pan[0] += (S.panT[0] - S.pan[0]) * panK;
+    S.pan[1] += (S.panT[1] - S.pan[1]) * panK;
+    // tilt moves the room only while just looking around: not at the TV, and it holds still under a note or a tape
+    if (S.zoomed) { S.tilt[0] *= .9; S.tilt[1] *= .9; }
+    else if (!document.body.classList.contains('note')) {
+      S.tilt[0] += (S.tiltT[0] - S.tilt[0]) * .1;
+      S.tilt[1] += (S.tiltT[1] - S.tilt[1]) * .1;
+    }
     const lerp = S.zoomed ? .03 : .05;
     const amp = S.zoomed ? .35 : 1; // calmer camera while browsing
     const drift = [Math.sin(t * .23) * .12, Math.cos(t * .17) * .08];
@@ -3255,7 +3337,7 @@ void main(){
     requestAnimationFrame(frame);
     setTimeout(() => document.body.classList.add('ready'), tuned ? 60 : 900);   // tuned in: the interface comes on with the picture
     restoreMemories();
-    thoughtTimer = setTimeout(nextThought, 1800);
+    thoughtTimer = setTimeout(TOUCH ? () => sayThought('Drag to look. Tap to explore.', 7000) : nextThought, 1800);
     try { await Promise.all(['46px VT323', '700 84px "Space Grotesk"', '400 20px "Space Grotesk"'].map(f => document.fonts.load(f))); } catch (e) {}
     // opened by double click (file://): browsers won't let WebGL read local files, so load the embedded copies
     if (location.protocol === 'file:' && !window.PROJECT_DATA) {

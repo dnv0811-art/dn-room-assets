@@ -584,14 +584,14 @@ const corsify = el => { if (CORS) el.crossOrigin = 'anonymous'; return el; };
    ===================================================================== */
 const WORKS = [
   { title: 'QueenLash',    tag: 'Cosmetics · Online store',       sticker: '#efb0cb', cover: 'projects/queenlash-cover.jpg',   still: 'projects/queenlash-still.jpg', tv: 'projects/queenlash-tv.mp4',   tape: 'projects/queenlash-tape.mp4' },
-  { title: 'Meva Fresh',   tag: 'Fruit import · Corporate site',  sticker: '#b3d95c', cover: 'projects/mevafresh-cover.jpg',   tv: 'projects/mevafresh-tv.mp4',   tape: 'projects/mevafresh-tape.mp4' },
+  { title: 'Meva Fresh',   tag: 'Fruit import · Corporate site',  sticker: '#b3d95c', cover: 'projects/mevafresh-cover.jpg',   still: 'projects/mevafresh-still.jpg', tv: 'projects/mevafresh-tv.mp4',   tape: 'projects/mevafresh-tape.mp4' },
   { title: 'Arkhidom',     tag: 'Architecture · Website',         sticker: '#f0c08f', cover: 'projects/arkhidom-cover.jpg',    still: 'projects/arkhidom-still.jpg', tv: 'projects/arkhidom-tv.mp4',    tape: 'projects/arkhidom-tape.mp4' },
   { title: 'Fuenf',        tag: 'Fashion & production · Website', sticker: '#cdf03a', cover: 'projects/fuenf-cover.jpg',       still: 'projects/fuenf-still.jpg', tv: 'projects/fuenf-tv.mp4',       tape: 'projects/fuenf-tape.mp4' },
   { title: 'Simply',       tag: 'AI implementation · Website',    sticker: '#ffd23f', cover: 'projects/simply-cover.jpg',      still: 'projects/simply-still.jpg', tv: 'projects/simply-tv.mp4',      tape: 'projects/simply-tape.mp4' },
   { title: 'Slide Projex', tag: 'Video production · One-pager',   sticker: '#e6f24e', cover: 'projects/slideprojex-cover.jpg', still: 'projects/slideprojex-still.jpg', tv: 'projects/slideprojex-tv.mp4', tape: 'projects/slideprojex-tape.mp4' },
   { title: 'Sam Yakushev', tag: 'Entrepreneur · Personal site',   sticker: '#ec5a4c', cover: 'projects/samyakushev-cover.jpg', still: 'projects/samyakushev-still.jpg', tv: 'projects/samyakushev-tv.mp4', tape: 'projects/samyakushev-tape.mp4' },
   { title: 'Blocklabs',    tag: 'Web3 · Promo site',              sticker: '#f2b53a', cover: 'projects/blocklabs-cover.jpg',   still: 'projects/blocklabs-still.jpg', tv: 'projects/blocklabs-tv.mp4',   tape: 'projects/blocklabs-tape.mp4' },
-  { title: 'Clinique 7',   tag: 'Plastic surgery · Landing page', sticker: '#b9a6e6', cover: 'projects/clinique-cover.jpg',    tv: 'projects/clinique7-tv.mp4',   tape: 'projects/clinique7-tape.mp4' },
+  { title: 'Clinique 7',   tag: 'Plastic surgery · Landing page', sticker: '#b9a6e6', cover: 'projects/clinique-cover.jpg',    still: 'projects/clinique7-still.jpg', tv: 'projects/clinique7-tv.mp4',   tape: 'projects/clinique7-tape.mp4' },
 ];
 // the TV's channels and the shelf's tapes are the same list, in the same order
 const PROJECTS = WORKS.map(w => ({ title: w.title, tag: w.tag, video: w.tv, img: w.still, cover: w.cover }));

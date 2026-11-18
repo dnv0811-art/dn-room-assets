@@ -1,0 +1,637 @@
+/* Dmitrii Nesterov, the room: styles (built from index.html) */
+:root {
+    --bg: #070605;
+    --fg: #ffffff;
+    --dim: rgba(255, 255, 255, .55);
+    --accent: #ffcf8a;
+    --edge: 20px;
+    --hand: 'Gochi Hand', 'Comic Sans MS', cursive;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; background: var(--bg); color: var(--fg); }
+  body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  canvas#scene { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: pan-y; }
+  /* game-style hand-drawn magnifier everywhere; hidden when the round badge takes over */
+  html, body, canvas#scene, a, button { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%231b120b' stroke-width='5'%3E%3Cpath d='M13.4 3.6c5.2-.4 9.4 3.5 9.6 8.6.3 5.1-3.6 9.5-8.8 9.7-5.1.3-9.3-3.6-9.6-8.6C4.3 8.1 8.3 4 13.4 3.6z'/%3E%3Cpath d='M20.6 20.2c2.6 2.4 5.4 5.5 8.6 9.2'/%3E%3C/g%3E%3Cpath d='M13.4 3.6c5.2-.4 9.4 3.5 9.6 8.6.3 5.1-3.6 9.5-8.8 9.7-5.1.3-9.3-3.6-9.6-8.6C4.3 8.1 8.3 4 13.4 3.6z' fill='rgba(255,236,200,.18)' stroke='%23fff8ec' stroke-width='2'/%3E%3Cpath d='M14.6 4.4c-3.4-.6-7.6 1.6-8.9 5.2' stroke='%23fff8ec' stroke-width='1' opacity='.55'/%3E%3Cpath d='M20.6 20.2c2.6 2.4 5.4 5.5 8.6 9.2' stroke='%23fff8ec' stroke-width='2.4'/%3E%3Cpath d='M8.9 10.6c.5-1.9 2-3.2 3.9-3.6' stroke='%23fff8ec' stroke-width='1.4'/%3E%3C/g%3E%3C/svg%3E") 14 13, zoom-in; }
+  /* zoomed in: the lens shows a minus, a click steps back */
+  canvas#scene.zoomed { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%231b120b' stroke-width='5'%3E%3Cpath d='M13.4 3.6c5.2-.4 9.4 3.5 9.6 8.6.3 5.1-3.6 9.5-8.8 9.7-5.1.3-9.3-3.6-9.6-8.6C4.3 8.1 8.3 4 13.4 3.6z'/%3E%3Cpath d='M20.6 20.2c2.6 2.4 5.4 5.5 8.6 9.2'/%3E%3C/g%3E%3Cpath d='M13.4 3.6c5.2-.4 9.4 3.5 9.6 8.6.3 5.1-3.6 9.5-8.8 9.7-5.1.3-9.3-3.6-9.6-8.6C4.3 8.1 8.3 4 13.4 3.6z' fill='rgba(255,236,200,.18)' stroke='%23fff8ec' stroke-width='2'/%3E%3Cpath d='M14.6 4.4c-3.4-.6-7.6 1.6-8.9 5.2' stroke='%23fff8ec' stroke-width='1' opacity='.55'/%3E%3Cpath d='M20.6 20.2c2.6 2.4 5.4 5.5 8.6 9.2' stroke='%23fff8ec' stroke-width='2.4'/%3E%3Cpath d='M8.9 10.6c.5-1.9 2-3.2 3.9-3.6' stroke='%23fff8ec' stroke-width='1.4'/%3E%3Cpath d='M9.4 12.8h8.2' stroke='%231b120b' stroke-width='4.2'/%3E%3Cpath d='M9.4 12.8h8.2' stroke='%23fff8ec' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E") 14 13, zoom-out; }
+  /* the lamp is just for fun: a hand, no hint */
+  canvas#scene.hand { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20.5V6.6c0-1.7 2.6-1.7 2.6 0v6.9c0-1.6 2.5-1.6 2.5 0v.8c0-1.6 2.5-1.6 2.5 0v.9c0-1.6 2.5-1.6 2.5 0V21c0 4-2.6 7-6.6 7h-1.4c-2.2 0-3.7-1-4.9-2.8l-3.4-5c-.8-1.3.9-2.6 2-1.5z' stroke='%231b120b' stroke-width='5'/%3E%3Cpath d='M12 20.5V6.6c0-1.7 2.6-1.7 2.6 0v6.9c0-1.6 2.5-1.6 2.5 0v.8c0-1.6 2.5-1.6 2.5 0v.9c0-1.6 2.5-1.6 2.5 0V21c0 4-2.6 7-6.6 7h-1.4c-2.2 0-3.7-1-4.9-2.8l-3.4-5c-.8-1.3.9-2.6 2-1.5z' fill='rgba(255,236,200,.22)' stroke='%23fff8ec' stroke-width='2'/%3E%3Cpath d='M17.1 14.3v3.2M19.6 15.1v2.6' stroke='%23fff8ec' stroke-width='1.2' opacity='.6'/%3E%3C/g%3E%3C/svg%3E") 13 5, pointer; }
+  canvas#scene.hot { cursor: none; }
+
+  /* ---------- UI: all text pinned to the browser edges ---------- */
+  .ui { position: fixed; z-index: 5; font-size: 13px; line-height: 1.2; font-weight: 500; letter-spacing: 0;
+        text-transform: uppercase; white-space: nowrap; color: var(--fg); text-shadow: 0 1px 14px rgba(0, 0, 0, .35);
+        opacity: 0; pointer-events: none; }
+  :where(.ui:not([style*="--i"])) { transition: opacity 1.2s ease .2s; }   /* the sequenced ones use their own entrance (below) */
+  body.ready .ui { opacity: 1; pointer-events: auto; }
+  /* after the preloader the interface eases in together with the picture, a tiny stagger clockwise from the
+     top left (opacity only, so their own transforms stay intact) */
+  body.ready .ui[style*="--i"] { animation: uiOn .7s cubic-bezier(.2,.7,.2,1) calc(var(--i) * .05s) backwards; }
+  @keyframes uiOn { from { opacity: 0; } to { opacity: 1; } }
+  a.ui, button.ui, .ui a, .ui button { color: inherit; font-family: inherit; padding: 0; text-transform: inherit; text-decoration: none; background: none; border: 0; }
+  .ui a, .ui button { font-size: inherit; font-weight: inherit; line-height: inherit; }
+  a.ui:focus-visible, button.ui:focus-visible, .ui a:focus-visible, .ui button:focus-visible { outline: 1px solid var(--fg); outline-offset: 4px; }
+
+  .name     { top: calc(var(--edge) - 2px); left: var(--edge); font-family: var(--hand); font-weight: 400;
+              font-size: 26px; line-height: 1; text-transform: none; }
+  .status   { top: var(--edge); left: 50%; transform: translateX(-50%); }
+  .status span { transition: opacity .5s ease; display: inline-flex; align-items: center; gap: 10px; }
+  .status .main::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+                          animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .25 } }
+  .status .alt { position: absolute; left: 50%; top: 0; transform: translateX(-50%); opacity: 0; color: var(--dim); }
+  body.gallery .status .main { opacity: 0; }
+  body.gallery .status .alt  { opacity: 1; }
+  .topright { top: var(--edge); right: var(--edge); display: flex; align-items: center; gap: 92px; }
+  .topright a:hover { opacity: .7; }
+  .skills   { bottom: var(--edge); left: var(--edge); display: flex; align-items: flex-end; gap: 14px; }
+  .skills span:last-child { margin-left: -52px; }   /* tucks in after the short 'developer' line */
+  /* ---- Memories: the last thing you found + counter; opens the notebook ---- */
+  /* the text sits on the same line as the bottom-left text; the last thing found stands right above it, at the right edge */
+  .memories { bottom: var(--edge); right: var(--edge); display: block; padding: 0; line-height: 1.2;
+    cursor: pointer; transition: transform .35s cubic-bezier(.2,.9,.3,1.3); }
+  .mem-pic { position: absolute; right: -4px; bottom: calc(100% + 8px); width: 52px; height: 52px; display: grid; grid-template: 100% / 100%; place-items: end center; }   /* definite track: tall pictures stay inside */
+  .mem-pic img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,.6));
+    transition: transform .4s cubic-bezier(.2,.9,.3,1.4); }
+  .mem-pic img[src=""], .mem-pic img:not([src]) { display: none; }
+  .mem-pic img.pl { width: 44px; height: 52px; padding: 3px 3px 10px; box-sizing: border-box; object-fit: cover; rotate: -4deg;
+    background: #f3eee3; filter: sepia(.1) drop-shadow(0 4px 6px rgba(0,0,0,.6)); }
+  .mem-pic .empty { display: none; }   /* nothing found yet: no placeholder, just the counter */
+  .mem-pic img[src]:not([src=""]) + .empty { display: none; }
+  .mem-txt { display: flex; align-items: baseline; gap: .45em; white-space: nowrap; }
+  .memories { text-transform: uppercase !important; }
+  .mem-txt i { font-style: normal; font-variant-numeric: tabular-nums; }
+  .mem-arr { display: inline-block; transition: transform .3s ease; }
+  .memories:hover { transform: translateY(-3px); }
+  .memories:hover .mem-pic img { transform: rotate(-8deg) scale(1.12); }
+  .memories:hover .mem-arr { transform: translate(2px, -2px); }
+  .memories.bump .mem-pic img { animation: memLand .7s cubic-bezier(.2,.9,.3,1.5); }
+  .memories.bump .mem-txt i { animation: bump .9s cubic-bezier(.2,.8,.2,1); color: var(--accent); }
+  @keyframes memLand { 0% { transform: scale(1.5) rotate(-12deg); } 100% { transform: none; } }
+  .mem-fly { position: fixed; z-index: 30; pointer-events: none; object-fit: contain; transform-origin: 0 0;
+    filter: drop-shadow(0 10px 12px rgba(0,0,0,.5)); transition: transform .95s cubic-bezier(.55,0,.25,1), opacity .25s ease .8s; }
+
+  /* ---- the Memories folder: a manila case file, flat on purpose (it floats face-on), always a straight rectangle ---- */
+  .nb-layer { --w: min(1000px, 88vw, calc(80vh * 1.44));
+    position: fixed; inset: 0; z-index: 11; display: grid; place-items: center; visibility: hidden; pointer-events: none; }
+  .nb-layer.open, .nb-layer.closing { visibility: visible; }
+  .nb-layer.open { pointer-events: auto; }
+  .nb-layer::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity .45s ease;
+    background: radial-gradient(ellipse at center, rgba(12,7,3,.45), rgba(12,7,3,.85)); }
+  .nb-layer.open::before { opacity: 1; }
+  .nb { position: relative; width: var(--w); aspect-ratio: 1.44; transform-origin: 50% 50%; }
+  /* the two cardboard panels: the back of the folder (right) and the inside of its front cover (left) */
+  .nb-board { position: absolute; top: -2.8%; bottom: -2.8%;
+    background-color: #d2b077;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .32 0 0 0 0 .15 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+                      radial-gradient(ellipse at 40% 35%, rgba(255,240,205,.35), rgba(120,80,30,.18)); }
+  .nb-board.l { left: -2%; right: 50%; border-radius: 7px 0 0 7px; background-color: #dcbd86;
+    box-shadow: inset -18px 0 22px -14px rgba(90,55,15,.45), inset 0 0 0 1px rgba(120,80,30,.25), 0 30px 60px -14px rgba(0,0,0,.7), 0 8px 20px rgba(0,0,0,.35); }
+  .nb-board.r { left: 50%; right: -2%; border-radius: 0 7px 7px 0;
+    box-shadow: inset 18px 0 22px -14px rgba(90,55,15,.45), inset 0 0 0 1px rgba(120,80,30,.25), 0 30px 60px -14px rgba(0,0,0,.7), 0 8px 20px rgba(0,0,0,.35); }
+  .nb.shut .nb-board.l, .nb.shut .nb-page.l, .nb.shut .nb-spine, .nb.shut .nb-btn { visibility: hidden; }
+  /* the front cover while it moves: drawn in WebGL (folder3d.js), bending a little, with light on it */
+  .nb-cover { position: absolute; left: -2%; right: -2%; top: -2.8%; bottom: -2.8%; width: 104%; height: 105.6%;
+    pointer-events: none; z-index: 6; visibility: hidden; }
+  .nb.shut .nb-cover, .nb.moving .nb-cover { visibility: visible; }
+  .nb-shade { position: absolute; inset: 0; pointer-events: none; z-index: 5; }   /* the moving cover's shadow on the page */
+  .nb-layer.anim .nb-close, .nb-layer.anim .nb-btn { opacity: 0; transition: none; }
+  .nb-close, .nb-btn { transition: opacity .25s ease; }
+  /* temporary flat faces used by the page turn: they only change width, never tilt */
+  .nb-face { position: absolute; top: 0; bottom: 0; width: 50%; pointer-events: none; will-change: transform; }
+  .nb-face.r { left: 50%; transform-origin: left center; }
+  .nb-face.l { left: 0; transform-origin: right center; }
+  /* the fold in the middle */
+  .nb-spine { position: absolute; top: 0; bottom: 0; left: 50%; width: 4%; translate: -50% 0; pointer-events: none; z-index: 3;
+    background: linear-gradient(90deg, transparent, rgba(70,40,15,.14) 40%, rgba(40,20,6,.35) 50%, rgba(70,40,15,.14) 60%, transparent); }
+  .nb-page { position: absolute; top: 0; bottom: 0; width: 50%; overflow: hidden; color: #3a2a1c;
+    background-color: #efe3c8;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .28 0 0 0 0 .14 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+                      radial-gradient(ellipse at 50% 40%, rgba(255,250,235,.7), rgba(180,140,90,.18) 100%); }
+  /* a couple of sheets under each page: just enough to feel like a stack of papers in a folder */
+  .nb-page.l { left: 0; border-radius: 3px 0 0 3px;
+    box-shadow: inset -22px 0 26px -16px rgba(70,40,15,.4), -2px 2px 0 #e4d6b8, -3px 3px 0 #c8b28b, -5px 4px 0 #ebdfc4, -6px 5px 0 #bfa77f, 0 3px 8px rgba(60,35,10,.25); }
+  .nb-page.r { right: 0; border-radius: 0 3px 3px 0;
+    box-shadow: inset 22px 0 26px -16px rgba(70,40,15,.4), 2px 2px 0 #e4d6b8, 3px 3px 0 #c8b28b, 5px 4px 0 #ebdfc4, 6px 5px 0 #bfa77f, 0 3px 8px rgba(60,35,10,.25); }
+  .nb-page::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+  .nb-page.l::after { background: linear-gradient(90deg, rgba(90,60,30,.1), transparent 12%, transparent 85%, rgba(60,35,15,.08)); }
+  .nb-page.r::after { background: linear-gradient(270deg, rgba(90,60,30,.1), transparent 12%, transparent 85%, rgba(60,35,15,.08)); }
+  .nb-face.leaf.r { box-shadow: inset 22px 0 26px -16px rgba(70,40,15,.4), 0 0 22px rgba(40,20,5,.3); }
+  .nb-face.leaf.l { box-shadow: inset -22px 0 26px -16px rgba(70,40,15,.4), 0 0 22px rgba(40,20,5,.3); }
+  .nb-head { position: absolute; left: 8%; right: 8%; top: 5.5%; font-family: var(--hand); font-size: calc(var(--w) * .0357); line-height: 1; color: #2a1d12; }
+  .nb-head small { display: block; font-family: 'Inter', sans-serif; font-size: calc(var(--w) * .011); letter-spacing: .14em; text-transform: uppercase; color: #8a6a4a; margin-top: .8em; }
+  .nb-page.r .nb-head { text-align: right; }
+  /* a printed 3 × 3 form on every page: ruled cells with typed exhibit numbers; what's stuck in them is by hand */
+  .nb-grid { position: absolute; left: 6%; right: 6%; top: 17%; bottom: 5.5%; display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    pointer-events: none; }   /* only the inner lines, like a tic-tac-toe board */
+  .nb-grid .cell { position: relative; border-right: 1px solid rgba(110,78,45,.3); border-bottom: 1px solid rgba(110,78,45,.3); }
+  .nb-grid .cell:nth-child(3n) { border-right: 0; } .nb-grid .cell:nth-child(n+7) { border-bottom: 0; }
+  .nb-grid .cell b { position: absolute; left: 5%; top: 5%; font: 600 calc(var(--w) * .0095)/1 'Inter', sans-serif;
+    letter-spacing: .14em; color: rgba(110,78,45,.6); }
+  .nb-item { position: absolute; width: 21%; padding: 0; border: 0; background: none; color: inherit; transform: rotate(var(--r));
+    display: flex; flex-direction: column; align-items: center; gap: 4px; transition: transform .3s cubic-bezier(.2,.9,.3,1.3); }
+  .nb-item .pic { position: relative; width: 100%; aspect-ratio: 1; display: grid; place-items: center; }
+  .nb-item .pic img.cut { width: calc(88% * var(--s, 1)); height: calc(88% * var(--s, 1)); object-fit: contain; filter: drop-shadow(0 8px 8px rgba(60,35,15,.35)); }
+  .nb-item .photo { width: 86%; aspect-ratio: 1; background: #fbf7ee; padding: 6% 6% 16%; box-shadow: 0 6px 10px rgba(60,35,15,.3); }
+  .nb-item .photo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: sepia(.15) contrast(1.05); }
+  /* polaroids are taped in; cut-out objects just lie on the page */
+  .nb-item .photo { position: relative; }
+  .nb-item .tvset { position: relative; display: block; width: calc(100% * var(--s, 1)); aspect-ratio: 1448 / 1086; }
+  .nb-item .tvset img.cut { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .nb-item .photo::before { content: ''; position: absolute; top: -7%; left: 50%; width: 46%; height: 13%; translate: -50% 0; rotate: -6deg; z-index: 2;
+    background: rgba(196, 174, 128, .82); box-shadow: 0 1px 2px rgba(60,35,10,.25), inset 0 0 0 1px rgba(120,90,40,.12); }
+  .nb-item .photo .blank { display: block; width: 100%; height: 100%;   /* not developed yet */
+    background: linear-gradient(160deg, #5c4834, #33271c); box-shadow: inset 0 0 18px rgba(0,0,0,.45); }
+  .nb-item .cap { font-family: var(--hand); font-size: calc(var(--w) * .017); line-height: 1.1; text-align: center; color: #3a2a1c;
+    width: 128%; text-wrap: balance; transform: rotate(var(--cr, 0deg)); }   /* long captions wrap inside the cell */
+  .nb-item.found:hover { transform: rotate(0deg) scale(1.06); }
+  .nb-item.locked { cursor: default; }
+  /* a memory whose circled letter was missed: a small red ring by its caption, like the ones on the notes */
+  .nb-item.missed .cap::after { content: ''; display: inline-block; width: .55em; height: .55em; margin-left: .35em; vertical-align: .05em;
+    border: 1.5px solid #b0321c; border-radius: 50%; }
+  .nb-item.locked img.cut { filter: blur(calc(var(--w) * .007)) sepia(.85) saturate(.55) brightness(.92) opacity(.42); }   /* a memory that hasn't come back yet */
+  .nb-item.locked .q { font-family: var(--hand); font-size: calc(var(--w) * .07); color: rgba(90,60,30,.28); width: 60%; aspect-ratio: 1;
+    display: grid; place-items: center; border: 2px dashed rgba(90,60,30,.22); border-radius: 50%; }
+  .nb-item.locked .cap { color: rgba(90,60,30,.4); }
+  .nb-btn { position: absolute; bottom: 2.6%; z-index: 5; background: none; border: 0; color: #6b4a2c; font-family: var(--hand);
+    font-size: calc(var(--w) * .024); padding: 4px 10px; }
+  .nb-btn:hover { color: #2a1d12; } .nb-btn[disabled] { opacity: .2; pointer-events: none; }
+  .nb-prev { left: 38%; } .nb-next { right: 38%; }
+  .nb-close { position: absolute; bottom: -8%; left: 50%; translate: -50% 0; background: none; border: 0; color: #fff; font: 500 13px/1 'Inter', sans-serif;
+    text-transform: uppercase; opacity: .8; }
+  .nb-close:hover { opacity: 1; }
+
+  /* ---- intellectual property notice ---- */
+  .legal-link { color: var(--dim) !important; text-transform: uppercase !important; }
+  .legal-link:hover { color: var(--fg) !important; text-decoration: underline; text-underline-offset: 3px; }
+  .legal { position: fixed; inset: 0; z-index: 12; display: grid; place-items: center; padding: 24px;
+           background: radial-gradient(ellipse at center, rgba(12, 7, 3, .35), rgba(12, 7, 3, .82));   /* same dimming as the notes, the room stays visible */
+           opacity: 0; pointer-events: none; transition: opacity .35s ease; }
+  .legal.open { opacity: 1; pointer-events: auto; }
+  .legal-card { position: relative; width: min(560px, 100%); max-height: min(78vh, 720px); overflow: auto;
+                padding: 44px 44px 36px; color: #3a2a1c; border-radius: 3px;
+                background: radial-gradient(ellipse at 40% 30%, #f6eedc, #e6d8bb);
+                box-shadow: 0 30px 60px rgba(0, 0, 0, .55); transform: translateY(16px) rotate(-.6deg);
+                transition: transform .45s cubic-bezier(.2,.9,.3,1.1); overscroll-behavior: contain; }
+  .legal.open .legal-card { transform: rotate(-.6deg); }
+  .legal-card h2 { font-family: var(--hand); font-weight: 400; font-size: 34px; line-height: 1.05; color: #2a1d12; margin: 0 0 6px; }
+  .legal-card .kicker { font-size: 10px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: #8a6a4a; margin-bottom: 22px; }
+  .legal-card p { font-size: 14px; line-height: 1.6; margin: 0 0 9px; }
+  .legal-card a { color: #9a3a1c; text-decoration: underline; text-underline-offset: 3px; }
+  .legal-card a:hover { color: #2a1d12; }
+  .legal-close { position: absolute; top: 18px; right: 20px; background: none; border: 0; color: #6b4a2c;
+                 font: 500 11px/1 'Inter', sans-serif; letter-spacing: .1em; text-transform: uppercase; padding: 6px; }
+  .legal-close:hover { color: #2a1d12; }
+  .legal-close:focus-visible { outline: 1px solid #6b4a2c; outline-offset: 2px; }
+  @keyframes bump { 0% { color: var(--accent); transform: translateY(-4px); } 100% { color: var(--fg); transform: none; } }
+  /* "Open for new …": the last word quietly swaps every few seconds with a small tape glitch */
+  /* a normal word space before it (the line is a flex row with a 10px gap); a fixed width, left-aligned,
+     so "Open for new" never moves when the word changes */
+  .status .main { gap: 0; } .status .main::before { margin-right: 10px; }   /* the dot keeps its 10px; the words get plain spacing */
+  .status .swap { display: inline-block; margin-left: .27em; text-align: left; white-space: nowrap; }
+  .status .swap.g { animation: swapGlitch .38s steps(1); }
+  @keyframes swapGlitch {
+    0%   { opacity: .7; translate: 2px 0; clip-path: inset(0 0 45% 0); text-shadow: -2px 0 rgba(255,80,80,.7), 2px 0 rgba(80,220,255,.7); }
+    25%  { opacity: .35; translate: -3px 0; clip-path: inset(40% 0 0 0); }
+    50%  { opacity: .9; translate: 1px 0; clip-path: inset(0 0 20% 0); text-shadow: 1px 0 rgba(255,80,80,.5), -1px 0 rgba(80,220,255,.5); }
+    75%  { opacity: 1; translate: 0 0; clip-path: inset(0); text-shadow: none; }
+  }
+  /* already explored: the ring and its label fade towards the room's warm brown */
+  .tag.seen { color: rgba(214, 178, 138, .72); text-shadow: none; }
+  .tag.seen svg path { stroke: rgba(214, 178, 138, .6); }
+
+  /* vertical side labels */
+  .side { top: 50%; font-variant-numeric: tabular-nums; writing-mode: vertical-rl; }
+  .side.l { left: var(--edge); transform: translateY(-50%) rotate(180deg); }
+  .side.r { right: var(--edge); transform: translateY(-50%); }
+
+  /* character's thoughts, bottom centre */
+  .thought { bottom: calc(var(--edge) - 6px); left: 50%; transform: translateX(-50%); font-family: var(--hand);
+             font-weight: 400; font-size: 27px; line-height: 1.1; text-transform: none; pointer-events: none !important;
+             text-shadow: 0 2px 18px rgba(0, 0, 0, .55); }
+  body.zoomed .thought, body.note .thought { opacity: 0 !important; transition-delay: 0s; }
+  .thought .ch { display: inline-block; white-space: pre; opacity: 0; filter: blur(6px); transform: translateY(.25em);
+                 transition: opacity .35s ease, filter .35s ease, transform .35s cubic-bezier(.2,.8,.2,1); }
+  .thought.in .ch { opacity: 1; filter: blur(0); transform: none; }
+  .thought.out .ch { opacity: 0; filter: blur(5px); transform: translateY(-.3em); transition-duration: .2s; }
+
+  .sound { display: flex; align-items: center; gap: 6px; }
+  .sound svg { width: 22px; height: 22px; display: block; }
+  .sound .w { transition: opacity .3s; }
+  .sound:not(.on) .w { opacity: 0; }
+  .sound .x { opacity: 0; transition: opacity .3s; }
+  .sound:not(.on) .x { opacity: 1; }
+  .sound.on .w1 { animation: wave 1.6s ease-in-out infinite; }
+  .sound.on .w2 { animation: wave 1.6s ease-in-out -.4s infinite; }
+  @keyframes wave { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+
+  /* ---------- Gallery controls (replace the hint while zoomed) ---------- */
+  .gal { bottom: var(--edge); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 32px; }
+  body:not(.gallery) .gal { opacity: 0 !important; pointer-events: none !important; transition-delay: 0s; }
+  .gal button { display: none; }   /* channels are switched on the set itself (VCR buttons), wheel, swipe or arrow keys */
+  .gal button:hover { color: var(--fg); }
+  .gal a { display: flex; gap: 14px; align-items: baseline; min-width: 20em; justify-content: center; }
+  .gal .idx { color: var(--dim); font-variant-numeric: tabular-nums; }
+  .gal .arr { transition: transform .2s; display: inline-block; }
+  .gal a:hover .arr { transform: translate(2px, -2px); }
+
+  /* ---------- occasional chewed-tape glitch on texts ---------- */
+  .vhs { animation: vhs .5s steps(1); }
+  @keyframes vhs {
+    0%   { translate: 0 0;    clip-path: inset(0 0 55% 0); text-shadow: 2px 0 rgba(255,60,60,.85), -2px 0 rgba(60,220,255,.85); }
+    12%  { translate: -5px 0; clip-path: inset(45% 0 0 0); }
+    24%  { translate: 3px 0;  clip-path: inset(0); opacity: .55; }
+    36%  { translate: -2px 0; clip-path: inset(18% 0 34% 0); opacity: 1; text-shadow: -3px 0 rgba(255,60,60,.85), 3px 0 rgba(60,220,255,.85); }
+    50%  { translate: 4px 0;  clip-path: inset(0 0 12% 0); }
+    64%  { translate: -1px 0; clip-path: inset(0); text-shadow: 1px 0 rgba(255,60,60,.6), -1px 0 rgba(60,220,255,.6); }
+    80%  { translate: 1px 0; }
+    100% { translate: 0 0; }
+  }
+
+  /* ---------- paper note popup: a crumpled wad that unfolds (WebGL, paper.js) ---------- */
+  .paper-layer { position: fixed; inset: 0; z-index: 8; pointer-events: none; }
+  .paper-layer::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity .6s ease .35s;
+    background: radial-gradient(ellipse at center, rgba(12, 7, 3, .35), rgba(12, 7, 3, .82)); }
+  .paper-layer.open { pointer-events: auto; }
+  .paper-layer.open::before { opacity: 1; transition-delay: 0s; }
+  .paper-gl { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+              filter: drop-shadow(0 28px 36px rgba(0, 0, 0, .5)); }
+  /* ---- notes without a letter: a polaroid instead of a crumpled sheet ---- */
+  .polaroid { position: absolute; left: 50%; top: 50%; width: min(340px, 78vw); padding: 16px 16px 22px; color: #3a2a1c;
+    background: #f3eee3; border-radius: 2px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .22 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    box-shadow: 0 30px 50px rgba(0,0,0,.55), 0 4px 8px rgba(0,0,0,.35);
+    transform: translate(-50%, 70vh) rotate(9deg); opacity: 0; pointer-events: none;
+    transition: transform .45s cubic-bezier(.5,0,.75,0), opacity .3s ease .15s; }
+  .paper-layer.open.memo .polaroid { transform: translate(-50%, -52%) rotate(-3deg); opacity: 1; pointer-events: auto;
+    transition: transform .95s cubic-bezier(.2,.9,.3,1.12), opacity .25s ease; }
+  .polaroid::before { content: ''; position: absolute; left: 50%; top: -14px; width: 92px; height: 28px; translate: -50% 0; rotate: 4deg;
+    background: rgba(200, 178, 132, .78); box-shadow: 0 1px 2px rgba(60,35,10,.25); backdrop-filter: blur(1px); }
+  .pl-photo { position: relative; aspect-ratio: 1; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 42%, #5a3a22 0%, #2a1a10 60%, #140c07 100%); }
+  .pl-photo.full img { inset: 0; width: 100%; height: 100%; object-fit: cover; filter: sepia(.12) contrast(1.04); }
+  .pl-caption .ltr { color: #b0321c; font-weight: 700; padding: 0 .12em; border: 1.5px solid rgba(176,50,28,.75); border-radius: 50%; }
+  .pl-photo img { position: absolute; inset: 9%; width: 82%; height: 82%; object-fit: contain;
+    filter: drop-shadow(0 14px 14px rgba(0,0,0,.5)); }
+  .pl-photo::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(135deg, rgba(255,255,255,.14), transparent 38%), radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.35)); }
+  /* the photo develops, like a real polaroid */
+  .pl-photo .dev { position: absolute; inset: 0; background: #2b2118; opacity: 0; pointer-events: none; }
+  .paper-layer.open.memo .pl-photo .dev { animation: develop 2.6s ease-out .55s both; }
+  @keyframes develop { 0% { opacity: 1; background: #3a2c20; } 40% { opacity: .75; background: #6a5236; } 100% { opacity: 0; } }
+  .pl-caption { padding: 16px 6px 0; }
+  .pl-caption h3 { font-family: var(--hand); font-weight: 400; font-size: 30px; line-height: 1; margin-bottom: 8px; color: #2a1d12; }
+  .pl-caption p { font-size: 13px; line-height: 1.5; margin-bottom: 6px; }
+
+  /* the item itself, lying on top of its note */
+  .paper-obj { position: absolute; left: 0; top: 0; pointer-events: none; opacity: 0;
+    transform: translateY(-40px) scale(.72) rotate(-10deg);
+    transition: opacity .25s ease, transform .3s ease; }
+  .paper-obj > img { display: block; width: 100%; height: 100%; object-fit: contain;
+    filter: drop-shadow(0 26px 22px rgba(0, 0, 0, .45)) drop-shadow(0 6px 6px rgba(0, 0, 0, .3));
+    animation: objFloat 5.5s ease-in-out infinite; }
+  .paper-obj.is-tv > img, .paper-obj:not(.is-tv) > .mini-tv { display: none; }
+  /* the golden card's polaroid, tossed on its top-right corner */
+  .gold-pl { position: absolute; left: 0; top: 0; box-sizing: border-box; background: #f6f1e6; pointer-events: none;
+    box-shadow: 0 22px 34px rgba(0,0,0,.45), 0 4px 8px rgba(0,0,0,.3); opacity: 0; transform: translateY(-40px) rotate(14deg) scale(.9);
+    transition: opacity .25s ease, transform .3s ease; }
+  .gold-pl i { display: block; width: 100%; aspect-ratio: 1; background: #140a05 center / cover no-repeat;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+  .paper-layer.open.gold .gold-pl { opacity: 1; transform: rotate(5deg); transition: opacity .3s ease 1.15s, transform .8s cubic-bezier(.2,.9,.3,1.15) 1.15s; }
+  /* a record keeps turning, slowly (rotate composes with the float's transform) */
+  @keyframes spinDisc { to { rotate: 360deg; } }
+  .paper-obj.spin > img { animation: objFloat 5.5s ease-in-out infinite, spinDisc 14s linear infinite; }
+  .nb-item .pic img.spin { animation: spinDisc 14s linear infinite; }
+
+  /* a little CRT for animated objects (gifs): objects/tv.png with the gif playing on its glass */
+  .mini-tv { position: absolute; left: -16%; right: -16%; top: 50%; translate: 0 -50%; aspect-ratio: 1448 / 1086;
+    filter: drop-shadow(0 26px 22px rgba(0,0,0,.45)) drop-shadow(0 6px 6px rgba(0,0,0,.3));
+    animation: objFloat 5.5s ease-in-out infinite; }
+  .mt-body { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* the glass of tv.png: x 212–992, y 164–716 of 1448×1086 */
+  .mt-screen { position: absolute; left: 14.64%; top: 15.1%; width: 53.87%; height: 50.83%; overflow: hidden; background: #000;
+    border-radius: 9% / 12.5%; box-shadow: inset 0 0 22px 8px rgba(0,0,0,.8); }
+  /* the TV's own reflection, laid back over the picture so the glass still reads */
+  .mt-reflect { background: url('objects/tv.png') no-repeat; background-size: 185.6% 196.7%; background-position: 31.7% 30.7%;
+    mix-blend-mode: screen; opacity: .55; }
+  .mt-screen img { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover;
+    filter: saturate(.85) contrast(1.12) brightness(1.05) sepia(.12); animation: mtJitter 4s steps(1) infinite; }
+  .mt-screen i { position: absolute; inset: 0; pointer-events: none; }
+  .mt-scan { background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; }
+  .mt-roll { background: linear-gradient(180deg, transparent 0 40%, rgba(255,255,255,.07) 48%, transparent 56% 100%);
+             background-size: 100% 300%; animation: mtRoll 3.2s linear infinite; }
+  .mt-glare { border-radius: inherit;
+    background: radial-gradient(130% 100% at 50% 50%, transparent 55%, rgba(0,0,0,.55) 100%),
+                linear-gradient(135deg, rgba(255,255,255,.08) 0%, transparent 35%);
+    animation: mtFlicker 2.6s steps(1) infinite; }
+  .mt-osd { position: absolute; left: 7%; top: 7%; font: 400 clamp(11px, 1.3vw, 17px)/1 'VT323', monospace; color: #eaffef;
+    text-shadow: 2px 2px 0 rgba(0,0,0,.7); letter-spacing: .04em; }
+  @keyframes mtRoll { from { background-position: 0 100%; } to { background-position: 0 -200%; } }
+  @keyframes mtFlicker { 0%,100% { opacity: 1 } 31% { opacity: .9 } 33% { opacity: 1 } 72% { opacity: .93 } 73% { opacity: 1 } }
+  @keyframes mtJitter { 0%,100% { transform: none } 47% { transform: translateX(2px) } 48% { transform: translateX(-1px) } 49% { transform: none } }
+  .open .paper-obj.has { opacity: 1; transform: none;
+    transition: opacity .45s ease 1.25s, transform .8s cubic-bezier(.2,.9,.3,1.25) 1.25s; }
+  @keyframes objFloat { 0%,100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-7px) rotate(1deg); } }
+  .paper-actions { position: absolute; left: 50%; translate: -50% 0; display: flex; gap: 28px; align-items: center;
+    opacity: 0; transition: opacity .3s; white-space: nowrap; }
+  .open .paper-actions { opacity: 1; transition: opacity .5s ease 1.8s; }
+  .paper-actions button, .paper-actions a { color: #fff; background: none; border: 0; text-decoration: none;
+    font: 500 13px/1 'Inter', sans-serif; text-transform: uppercase; opacity: .8; }
+  .paper-actions button:hover, .paper-actions a:hover { opacity: 1; }
+  .paper-save { display: none; padding: 12px 18px !important; border-radius: 999px; opacity: 1 !important;
+    background: linear-gradient(135deg, #f7e3a1, #d7a945 45%, #f4d785) !important; color: #2e1c03 !important;
+    box-shadow: 0 6px 24px rgba(215, 169, 69, .45); }
+  .paper-layer.gold .paper-save { display: inline-block; }
+
+  /* ---- the logo is a word puzzle: D______ N_______ ---- */
+  .name .slot { position: relative; display: inline-block; }
+  .name .slot b { font-weight: 400; opacity: 0; display: inline-block; }
+  .name .slot::after { content: ''; position: absolute; left: 8%; right: 8%; bottom: .08em; height: 2px; border-radius: 2px;
+    background: currentColor; opacity: .85; transition: opacity .4s; }
+  .name .slot.on b { opacity: 1; }
+  .name .slot.on::after { opacity: 0; }
+  .name .slot.pop b { animation: letterPop 1.1s cubic-bezier(.2,.9,.25,1.3); color: var(--accent); }
+  @keyframes letterPop { 0% { transform: translateY(-.8em) scale(2.2) rotate(-14deg); opacity: 0; filter: blur(3px); }
+    55% { opacity: 1; filter: blur(0); } 100% { transform: none; } }
+  .name .slot.pop b { animation-fill-mode: both; }
+  .name .slot.settle b { transition: color 1.6s ease; }
+  body.named .name { cursor: pointer; }
+  /* all letters found: the name turns to shimmering gold (and says "click me" to reopen the golden card) */
+  body.named .name { background: linear-gradient(100deg, #b8852a 0%, #f7e3a1 20%, #d7a945 40%, #fff2c4 50%, #d7a945 60%, #f4d785 80%, #b8852a 100%);
+    background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; animation: goldShine 3.2s linear infinite;
+    text-shadow: none; filter: drop-shadow(0 0 10px rgba(255, 200, 110, .35)); }
+  body.named .name, body.named .name * { color: transparent !important; -webkit-text-fill-color: transparent; }
+  @keyframes goldShine { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* round cursor badge: "Flip through the channels" / "Check the website" */
+  .tag { position: fixed; z-index: 6; left: 0; top: 0; width: 132px; height: 132px; margin: -66px 0 0 -66px;
+         display: grid; place-items: center; text-align: center;
+         font-size: 11px; line-height: 1.25; font-weight: 500; text-transform: uppercase; color: #fff;
+         text-shadow: 0 1px 12px rgba(0, 0, 0, .4); pointer-events: none; will-change: transform;
+         opacity: 0; transition: opacity .35s ease; }
+  .tag i { font-style: normal; display: block; transform: scale(.6); transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+  .tag.show { opacity: 1; }
+  .tag svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
+             filter: drop-shadow(0 1px 6px rgba(0, 0, 0, .35)); }
+  .tag svg path { fill: none; stroke: #fff; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .tag i { position: relative; }
+  .tag.show i { transform: scale(1); }
+
+  /* ---------- Preloader: the whole screen is the set, searching for the signal ---------- */
+  #loader { position: fixed; inset: 0; z-index: 10; overflow: hidden; background: #040507; color: #f3e3c3;
+            transition: opacity .45s ease; }
+  #loader canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #loader.crt #sigCv { visibility: hidden; }   /* the flat signal is drawn through the tube (#sigCrt) instead */
+  /* the tube itself: scanlines, a warm vignette and a bit of glass glare */
+  #loader::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px),
+                radial-gradient(ellipse 75% 70% at 50% 50%, transparent 55%, rgba(0,0,0,.5)),
+                linear-gradient(160deg, rgba(255,230,190,.05), transparent 35%); }
+  /* on-screen display: the same as the set's own OSD (VT323, near white, a hard dark drop shadow) */
+  #loader .osd { position: absolute; z-index: 1; font: 400 clamp(22px, 2.3vw, 30px)/1 'VT323', monospace;
+    color: #eaffef; text-shadow: 2px 2px 0 rgba(0,0,0,.8); }
+  #loader .ch { top: 24px; right: 28px; }
+  #loader .bl { left: 28px; bottom: 24px; }
+  #loader .mid { left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  #loader .mid::before { content: ''; position: absolute; inset: -90% -45%; z-index: -1; pointer-events: none;   /* keeps the OSD readable */
+    background: radial-gradient(closest-side, rgba(10,6,3,.55), rgba(10,6,3,0)); }
+  /* a slim OSD meter: thin ticks, the filled ones bright, the rest a faint trace */
+  #loader .cells { display: flex; gap: 4px; align-items: center; }
+  #loader .cells i { width: 2px; height: 14px; background: rgba(234,255,239,.16); box-shadow: 1px 1px 0 rgba(0,0,0,.55); transition: background .15s; }
+  #loader .cells i.on { background: #eaffef; }
+  #loader .mid { display: none; }   /* no progress bar: the corner OSD says enough */
+  #loader.locked .mid { opacity: 0; transition: opacity .25s; }
+  #loader.off { opacity: 0; }
+
+  /* ---------- the project's tape: ejected from the set, in its sleeve with the cassette half pulled out ---------- */
+  .tape-layer { --w: min(380px, 39vw, 46vh); position: fixed; inset: 0; z-index: 12; visibility: hidden; pointer-events: none; }
+  .tape-layer.open, .tape-layer.closing { visibility: visible; }
+  .tape-layer.open { pointer-events: auto; }
+  .tape-layer::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity .4s ease;
+    background: radial-gradient(ellipse at center, rgba(12,7,3,.35), rgba(12,7,3,.82)); }
+  .tape-layer.open::before { opacity: 1; }
+  /* one object, like a real tape: the sleeve (cassette tucked inside) comes up out of the set as a whole, then the
+     cassette slides halfway out of its open side. Putting it away runs the other way: in, then down. */
+  .tcase { position: absolute; transform-origin: 25% 50%; left: 50%; top: 50%; width: calc(var(--w) * 2); height: calc(var(--w) * 1.5);
+    translate: -37.3% -50%; pointer-events: none;   /* sleeve + the cassette sticking out of it, centred as one shape */
+    transform: translateY(75vh) rotate(-16deg) scale(.6); opacity: 0;
+    transition: transform .45s cubic-bezier(.55,0,.8,.4) .32s, opacity .2s ease .6s; }
+  .tape-layer.open .tcase { transform: none; opacity: 1; transition: transform .75s cubic-bezier(.2,.9,.3,1.1), opacity .15s ease; }
+  /* about as long as the sleeve is tall (like a real tape in its box), and still half inside it when pulled out */
+  .tcase .tape { position: absolute; width: calc(var(--w) * 1.42); aspect-ratio: 1190 / 688; left: calc(var(--w) * .49); top: calc(var(--w) * .44);
+    filter: drop-shadow(0 18px 22px rgba(0,0,0,.55)) drop-shadow(0 4px 6px rgba(0,0,0,.4));
+    /* tucked: centred inside the sleeve, lying along it */
+    transform: translate(calc(var(--w) * -.7), calc(var(--w) * -.1)) rotate(86deg);
+    transition: transform .38s cubic-bezier(.5,0,.75,.4); }
+  /* slides out through the sleeve's open side only: parallel to the sleeve, straight along it, half still inside */
+  .tape-layer.open .tcase .tape { transform: translate(calc(var(--w) * -.07), calc(var(--w) * -.13)) rotate(90deg); transition: transform .6s cubic-bezier(.25,.8,.3,1.04) .62s; }
+  /* turned round so the cassette's flap faces into the sleeve (it goes in flap first, like a real one) */
+  .tcase .tape img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; rotate: 180deg; }
+  .tcase .label { position: absolute; left: 30%; top: 26%; width: 39.2%; height: 40.5%; display: grid; place-items: center;
+    rotate: 180deg; font: 400 calc(var(--w) * .104)/1 var(--hand); color: #2a1d12; white-space: nowrap; }
+  .tcase .label span { rotate: -2deg; }
+  /* the sticker slapped on the cassette ("Play the site"): a strip of paper, glued at one end, its free end hanging
+     a little over the cassette's edge. It swings and settles when the cassette slides out, tilts toward the cursor. */
+  .tcase .stick-pin, .ft .stick-pin { position: absolute; left: 18%; top: 18%; width: 0; height: 0; rotate: -86deg; }
+  .tcase .sticker, .ft .sticker { position: absolute; left: 0; top: 0; width: calc(var(--w) * .42); height: calc(var(--w) * .165); translate: -50% -50%;
+    pointer-events: auto; cursor: pointer; border: 0; padding: 0 0 0 4%; border-radius: 2px; display: flex; align-items: center; justify-content: center; gap: .3em;
+    background: linear-gradient(100deg, rgba(0,0,0,.06), rgba(255,255,255,0) 22%, rgba(255,255,255,0) 70%, rgba(255,255,255,.22) 92%, rgba(0,0,0,.08)), var(--stick, #d98fdc);
+    font: 400 calc(var(--w) * .058)/1 var(--hand); color: #2b1630; white-space: nowrap;
+    transform-origin: 18% 50%; transform: perspective(500px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    box-shadow: 0 1px 1px rgba(0,0,0,.25), 0 6px 10px -4px rgba(0,0,0,.45);
+    transition: transform .35s cubic-bezier(.3,1.6,.5,1), box-shadow .3s ease; }
+  /* the free end is a touch lifted: lighter where it curls up, a little darker gap under it */
+  .tcase .sticker::after, .ft .sticker::after { content: ''; position: absolute; right: 0; top: 0; width: 13%; height: 100%; pointer-events: none;
+    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.18) 60%, rgba(0,0,0,.12)); border-radius: 0 2px 2px 0; }
+  /* the arrow, drawn with the same marker */
+  .tcase .sticker .arr, .ft .sticker .arr { width: .95em; height: .95em; flex: none; fill: none; stroke: currentColor; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; translate: 0 -.05em; }
+  .tcase .sticker:hover { box-shadow: 0 1px 1px rgba(0,0,0,.2), 0 14px 18px -6px rgba(0,0,0,.55); }
+  .tcase .sticker:focus-visible { outline: 1px dashed rgba(255,255,255,.6); outline-offset: 3px; }
+  .tcase .sticker.wob, .ft .sticker.wob { animation: stickWob 1.7s ease-in-out; }
+  /* a soft sway of a loose end after the cassette stops: one lazy swing, then it settles */
+  @keyframes stickWob {
+    0% { rotate: 0deg; } 22% { rotate: 3.2deg; } 50% { rotate: -1.6deg; } 76% { rotate: .6deg; } 100% { rotate: 0deg; } }
+  .tcase .sleeve { position: absolute; left: 0; top: 0; width: var(--w); aspect-ratio: 1024 / 1536; border-radius: 3px; overflow: hidden; rotate: -4deg;
+    box-shadow: 0 30px 50px rgba(0,0,0,.55), 0 6px 12px rgba(0,0,0,.4); }
+  .tcase .sleeve img { width: 100%; height: 100%; display: block; }
+  .tcase .sleeve::after { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    background: linear-gradient(115deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 62%, rgba(255,255,255,.06) 78%, rgba(255,255,255,0) 100%);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), inset 0 0 18px rgba(0,0,0,.35); }
+  /* no cover yet: a plain black sleeve with the title */
+  .tcase .sleeve.plain { background: linear-gradient(160deg, #1d1712, #0c0907); display: grid; place-content: center; text-align: center; color: #f1e4cc; }
+  .tcase .sleeve.plain b { font: 400 calc(var(--w) * .16)/1 var(--hand); }
+  .tcase .sleeve.plain i { display: block; margin-top: 12px; font: 500 calc(var(--w) * .04)/1 Inter, sans-serif; font-style: normal; text-transform: uppercase; letter-spacing: .08em; opacity: .6; }
+  .tape-nav { position: absolute; left: 50%; bottom: var(--edge); translate: -50% 0; display: flex; gap: 44px; opacity: 0; transition: opacity .3s ease; }
+  .tape-layer.open .tape-nav { opacity: 1; transition-delay: .7s; }
+  .tape-layer.launch .tcase .tape { visibility: hidden; }
+  /* the cassette pulled all the way out of its sleeve (clear of it: from here the flying copy can take over unseen) */
+  .tcase.pullout .tape { transform: translate(calc(var(--w) * .29), calc(var(--w) * -.155)) rotate(90deg) !important; transition: transform .32s cubic-bezier(.4,0,.2,1) !important; }
+  .tcase.settle .tape { transition: transform .5s cubic-bezier(.3,.8,.3,1) !important; }
+  /* the neighbours slide away off the screen's edges (no fading) when the tape goes into the set... */
+  .tape-layer.launch .tside { opacity: 1 !important; translate: calc(var(--out) * 4.5) 0 !important; transition: translate .75s cubic-bezier(.5,0,.8,.4) !important; }
+  /* ...and come back the same way, the sleeve rising from where it was put down */
+  .tape-layer.return:not(.open) .tcase { transform: translate(-30vw, 105vh) rotate(-22deg) !important; opacity: 1 !important; transition: none !important; }
+  .tape-layer.return:not(.open) .tside { opacity: 1 !important; translate: calc(var(--out) * 4.5) 0 !important; transition: none !important; }
+  .tape-layer.return.open .tcase { transition: transform .72s cubic-bezier(.2,.8,.3,1) !important; }
+  .tape-layer.return.open .tside { transition: translate .72s cubic-bezier(.2,.8,.3,1) .06s, opacity .2s ease !important; }   /* the cassette has left the hand: the flying copy takes over */
+  /* ...and the empty sleeve is put down: it slides away off the bottom of the screen (no fading out) */
+  .tape-layer.launch.closing .tcase { opacity: 1 !important; transform: translate(-30vw, 105vh) rotate(-22deg) !important;
+    transition: transform .8s cubic-bezier(.45,0,.75,.45) !important; }
+  .tape-nav button { color: #fff; background: none; border: 0; padding: 0; opacity: .6; font: 500 13px/1 Inter, sans-serif; text-transform: uppercase; transition: opacity .2s; }
+  .tape-nav .tape-close { opacity: .85; }
+  .tape-nav button:hover { opacity: 1; }
+  /* the shelf: the previous and next tapes' sleeves wait at the sides, cut by the screen's edges. They sit exactly where
+     the sleeve in hand sits (same size), only shifted and tilted; a step moves the whole row one place. */
+  .tside { position: absolute; left: calc(50% - var(--w) * .746); top: calc(50% - var(--w) * .75); width: var(--w); aspect-ratio: 1024 / 1536;
+    border-radius: 3px; overflow: hidden; cursor: pointer; pointer-events: auto;
+    box-shadow: 0 30px 50px rgba(0,0,0,.55), 0 6px 12px rgba(0,0,0,.4);
+    translate: var(--out, 0) 0; opacity: 0;   /* place, size, tilt and shade: set from JS, along the shelf's orbit */
+    transition: translate .5s cubic-bezier(.5,0,.8,.4), opacity .3s ease; }
+  .tside img { width: 100%; height: 100%; display: block; }
+  .tside::after { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    background: linear-gradient(115deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 62%, rgba(255,255,255,.05) 78%, rgba(255,255,255,0) 100%);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), inset 0 0 18px rgba(0,0,0,.35); }
+  .tside.plain { background: linear-gradient(160deg, #1d1712, #0c0907); display: grid; place-content: center; text-align: center; color: #f1e4cc; font: 400 calc(var(--w) * .14)/1 var(--hand); }
+  .tape-layer.open .tside { opacity: 1; translate: 0 0; transition: translate .6s cubic-bezier(.2,.9,.3,1) .35s, opacity .35s ease .35s; }
+  .tcase.snap, .tcase.snap .tape, .tcase.snap .sleeve { transition: none !important; }
+  /* each flip is lived through: the cassette slides back into its sleeve, the row moves one place along the shelf,
+     and the new tape's cassette slides out */
+  .tcase.tucked .tape { transform: translate(calc(var(--w) * -.7), calc(var(--w) * -.1)) rotate(86deg) !important;
+    transition: transform .26s cubic-bezier(.5,0,.75,.4) !important; }
+  .tcase.slideout .tape { transition: transform .55s cubic-bezier(.25,.8,.3,1.08) !important; }
+
+  /* the project's walkthrough video, played from the sticker on its cassette: over the tape, the room dimmed further */
+  .vid-layer { position: fixed; inset: 0; z-index: 13; display: grid; place-items: center; visibility: hidden; pointer-events: none;
+    background: rgba(8,5,3,.86); opacity: 0; transition: opacity .35s ease, visibility 0s linear .35s; }
+  .vid-layer.open { visibility: visible; pointer-events: auto; opacity: 1; transition: opacity .35s ease; }
+  .vid-box { width: min(1120px, 88vw, calc((100vh - 170px) * 1.866)); aspect-ratio: 2016 / 1080; border-radius: 6px; overflow: hidden; background: #000;
+    box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06);
+    transform: translateY(24px) scale(.94); opacity: 0; transition: transform .45s cubic-bezier(.2,.9,.3,1.05), opacity .3s ease; }
+  .vid-layer.open .vid-box { transform: none; opacity: 1; transition-delay: .08s; }
+  .vid-box video { width: 100%; height: 100%; display: block; object-fit: contain; background: #000; }
+  .vid-close { position: absolute; left: 50%; bottom: var(--edge); translate: -50% 0; color: #fff; background: none; border: 0; padding: 0;
+    opacity: .85; font: 500 13px/1 Inter, sans-serif; text-transform: uppercase; cursor: pointer; transition: opacity .2s; }
+  .vid-close:hover { opacity: 1; }
+
+  /* the cassette on its way into the VCR: a thin 3D box (its label side on top, the spine in front) that flies from
+     the hand to the set's door, lies down and slides in. What's gone inside is cut off at the door's top edge. */
+  .ft-wrap { position: fixed; inset: 0; z-index: 13; pointer-events: none; visibility: hidden; }
+  .ft-wrap.on { visibility: visible; }
+  .ft { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transform-origin: 50% 50%; will-change: transform; }
+  .ft-top { position: absolute; inset: 0; }
+  .ft-top img { width: 100%; height: 100%; display: block; filter: brightness(calc(1 - var(--dark, 0))) drop-shadow(0 12px 18px rgba(0,0,0,.4)); }
+  .ft-top .label { position: absolute; left: 30.8%; top: 33.5%; width: 39.2%; height: 40.5%; display: grid; place-items: center;
+    font-family: var(--hand); color: #2a1d12; white-space: nowrap; line-height: 1; opacity: calc(1 - var(--dark, 0)); }
+  .ft-top .label span { rotate: -2deg; }
+  /* the spine: hangs from the cassette's near edge (where the picture's opaque part ends: 1.6% / 96.7%), a real tape's thickness */
+  .ft-front { position: absolute; left: 1.7%; width: 96.2%; top: 96.4%; height: 22%; transform-origin: 50% 0; transform: rotateX(-90deg);
+    background: linear-gradient(180deg, #2b2521, #15110e 55%, #0b0907); border-radius: 0 0 4px 4px; box-shadow: inset 0 1px 0 rgba(255,255,255,.09); }
+  .ft-front::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: #000; opacity: var(--dark, 0); }
+  /* watching a tape up close (the VCR's own buttons are out of frame): its controls on the bottom row */
+  .vp-nav { position: fixed; left: 50%; bottom: var(--edge); translate: -50% 0; z-index: 6; display: flex; gap: 28px;
+    opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+  body.vcr-play.vp-close .vp-nav { opacity: 1; pointer-events: auto; transition-delay: .9s; }
+  .vp-nav button { color: #fff; background: none; border: 0; padding: 0; opacity: .6; font: 500 13px/1 Inter, sans-serif; text-transform: uppercase; cursor: pointer; transition: opacity .2s; white-space: nowrap; }
+  .vp-nav button:hover, .vp-nav .vp-stop { opacity: .9; }
+  body.vp-cam .vp-nav [data-vp="rew"], body.vp-cam .vp-nav [data-vp="ff"] { display: none; }
+  .vp-nav button:hover { opacity: 1; }
+  /* the flying copy carries the sticker too (its frame is the in-hand one turned half round) */
+  .ft .stick-pin { left: 82%; top: 82%; rotate: 94deg; }
+  .ft .sticker { pointer-events: none; cursor: default; filter: brightness(calc(1 - var(--dark, 0))); }
+  /* the door's flap pushed in: a dark opening behind the cassette */
+  .ft-gap { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse at 50% 30%, #000 40%, #0b0806 100%); }
+
+  /* up close at the TV: a sticky note slapped on the set's lower right corner.
+     Pinned to the picture (it rides with the camera); peels off once a button has been pressed. */
+  .tv-tip { position: fixed; left: 0; top: 0; z-index: 4; pointer-events: none; width: 0; height: 0; --s: 1px; visibility: hidden; }
+  .tv-tip.show, .tv-tip.gone { visibility: visible; }
+  .tv-tip .card { position: absolute; left: 0; top: 0; translate: -50% -50%; width: calc(var(--s) * 96); height: calc(var(--s) * 32);
+    display: grid; place-items: center; font: 400 calc(var(--s) * 12.5)/1 var(--hand); color: #2c2113; white-space: nowrap; border-radius: 2px;
+    background: linear-gradient(100deg, rgba(0,0,0,.05), rgba(255,255,255,0) 25%, rgba(255,255,255,0) 72%, rgba(255,255,255,.25) 93%, rgba(0,0,0,.07)), #f2d36e;
+    box-shadow: 0 1px 1px rgba(0,0,0,.3), 0 calc(var(--s) * 6) calc(var(--s) * 10) calc(var(--s) * -3) rgba(0,0,0,.55);
+    transform-origin: 70% 50%; transform: scale(1.3) rotate(-16deg); opacity: 0;
+    transition: transform .25s ease, opacity .2s ease; }
+  .tv-tip.show .card { transform: rotate(-4deg); opacity: 1; transition: transform .5s cubic-bezier(.2,1.5,.4,1) .9s, opacity .15s ease .9s;
+    animation: tipWob 1.6s ease-in-out 1.45s; }
+  @keyframes tipWob { 0%, 100% { rotate: 0deg; } 25% { rotate: 2.4deg; } 55% { rotate: -1.2deg; } 80% { rotate: .4deg; } }
+  /* job done: it comes unstuck and drops away */
+  .tv-tip.gone .card { transform: translateY(calc(var(--s) * 40)) rotate(14deg); opacity: 0; transition: transform .55s cubic-bezier(.5,0,.8,.5), opacity .45s ease .1s; animation: none; }
+
+  /* what the button under the cursor does (TV set, pager): a quiet line at the bottom centre */
+  .act-hint { position: fixed; left: 50%; bottom: var(--edge); translate: -50% 0; z-index: 14; pointer-events: none;
+    font: 500 13px/1.2 Inter, sans-serif; text-transform: uppercase; letter-spacing: .04em; color: var(--fg); white-space: nowrap;
+    text-shadow: 0 1px 14px rgba(0,0,0,.6); opacity: 0; transform: translateY(4px); transition: opacity .18s ease, transform .18s ease; }
+  .act-hint.show { opacity: 1; transform: none; }
+  /* it sits on the bottom row, level with the other bottom texts; at the TV it takes the channel caption's place */
+  body.gallery.hinting .gal { opacity: 0 !important; transition: opacity .15s ease; }
+  /* a tape in hand (its navigation takes the channel caption's row), the memories book, a note: the caption steps aside */
+  body.tape-open .gal, body.note .gal, body.vcr-play .gal { opacity: 0 !important; pointer-events: none !important; transition: opacity .2s ease; }
+  .act-hint::before { content: '▸ '; opacity: .6; }
+  /* ---------- Contacts: an old pager that buzzes in and types the message ---------- */
+  .pager-layer { position: fixed; inset: 0; z-index: 12; display: grid; place-items: center; visibility: hidden; pointer-events: none; }
+  .pager-layer.open { visibility: visible; pointer-events: auto; }
+  .pager-layer::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity .4s ease;
+    background: radial-gradient(ellipse at center, rgba(12,7,3,.35), rgba(12,7,3,.82)); }
+  .pager-layer.open::before { opacity: 1; }
+  .pager { --pw: min(560px, 88vw); position: relative; width: var(--pw); aspect-ratio: 932 / 623;
+    filter: drop-shadow(0 30px 40px rgba(0,0,0,.6)) drop-shadow(0 6px 10px rgba(0,0,0,.4));
+    transform: translate(40vw, -60vh) rotate(25deg) scale(.4); opacity: 0;
+    transition: transform .45s cubic-bezier(.5,0,.75,0), opacity .3s ease .1s; }
+  .pager-layer.open .pager { transform: none; opacity: 1; transition: transform .75s cubic-bezier(.2,.9,.3,1.15), opacity .2s ease; }
+  /* put away: it slides back up to the Contacts link it came from, then the layer hides */
+  .pager-layer.closing { visibility: visible; }
+  .pager-layer.closing .pager { transform: translate(40vw, -60vh) rotate(25deg) scale(.4); opacity: 0;
+    transition: transform .55s cubic-bezier(.55,0,.8,.4), opacity .2s ease .35s; }
+  .pager.buzz { animation: pagerBuzz .5s linear 2; }
+  @keyframes pagerBuzz { 0%,100% { translate: 0 0; rotate: 0deg; } 10% { translate: -3px 1px; rotate: -.8deg; } 20% { translate: 3px -1px; rotate: .8deg; }
+    30% { translate: -3px 0; rotate: -.6deg; } 40% { translate: 2px 1px; rotate: .5deg; } 50% { translate: 0 0; rotate: 0deg; } }
+  .pager > img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  /* the LCD: dark segments on olive glass */
+  .pg-lcd { position: absolute; left: 22.5%; top: 21.5%; width: 49%; height: 23%; display: flex; flex-direction: column; justify-content: center;
+    gap: .18em; overflow: hidden; font: 400 calc(var(--pw) * .052)/1 'VT323', monospace; color: #1e2611; text-shadow: 1px 1px 0 rgba(30,38,17,.18); }
+  .pg-lcd .l1 { font-size: .62em; letter-spacing: .06em; opacity: .85; display: flex; justify-content: space-between; }
+  /* both lines sit level with the printed icons on the glass (the bell-off circle and the speaker) */
+  .pg-lcd .l1 { transform: translateY(.42em); } .pg-lcd .l2 { transform: translateY(.16em); }
+  .pg-lcd .l1 b { font-weight: 400; }
+  .pg-lcd .l2 { white-space: nowrap; position: relative; }
+  .pg-lcd { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20.5V6.6c0-1.7 2.6-1.7 2.6 0v6.9c0-1.6 2.5-1.6 2.5 0v.8c0-1.6 2.5-1.6 2.5 0v.9c0-1.6 2.5-1.6 2.5 0V21c0 4-2.6 7-6.6 7h-1.4c-2.2 0-3.7-1-4.9-2.8l-3.4-5c-.8-1.3.9-2.6 2-1.5z' stroke='%231b120b' stroke-width='5'/%3E%3Cpath d='M12 20.5V6.6c0-1.7 2.6-1.7 2.6 0v6.9c0-1.6 2.5-1.6 2.5 0v.8c0-1.6 2.5-1.6 2.5 0v.9c0-1.6 2.5-1.6 2.5 0V21c0 4-2.6 7-6.6 7h-1.4c-2.2 0-3.7-1-4.9-2.8l-3.4-5c-.8-1.3.9-2.6 2-1.5z' fill='rgba(255,236,200,.22)' stroke='%23fff8ec' stroke-width='2'/%3E%3Cpath d='M17.1 14.3v3.2M19.6 15.1v2.6' stroke='%23fff8ec' stroke-width='1.2' opacity='.6'/%3E%3C/g%3E%3C/svg%3E") 13 5, pointer; }   /* the screen itself is a link: tap the address to write / message / open */
+  .pg-lcd .l2 span { display: inline-block; }
+  .pg-lcd .l2.scroll span { animation: pgScroll 6s linear infinite alternate; }
+  @keyframes pgScroll { 0%,15% { transform: translateX(0); } 85%,100% { transform: translateX(var(--scroll, 0)); } }
+  .pg-lcd .cur { display: inline-block; width: .45em; height: .9em; margin-left: .05em; vertical-align: -.1em; background: currentColor; animation: pgBlink 1s steps(1) infinite; }
+  @keyframes pgBlink { 50% { opacity: 0; } }
+  .pg-led { position: absolute; left: 79.6%; top: 80.6%; width: 6%; height: 1.8%; border-radius: 99px; background: #d4ff8a; opacity: 0;
+    box-shadow: 0 0 4px 1px rgba(190,255,110,.9), 0 0 14px 2px rgba(170,255,90,.45); }   /* exactly over the light on the picture */
+  .pager.ring .pg-led { animation: pgLed .5s steps(1) 6; }
+  @keyframes pgLed { 50% { opacity: 1; } }
+  .pg-btn { position: absolute; background: none; border: 0; padding: 0; border-radius: 10px; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20.5V6.6c0-1.7 2.6-1.7 2.6 0v6.9c0-1.6 2.5-1.6 2.5 0v.8c0-1.6 2.5-1.6 2.5 0v.9c0-1.6 2.5-1.6 2.5 0V21c0 4-2.6 7-6.6 7h-1.4c-2.2 0-3.7-1-4.9-2.8l-3.4-5c-.8-1.3.9-2.6 2-1.5z' stroke='%231b120b' stroke-width='5'/%3E%3Cpath d='M12 20.5V6.6c0-1.7 2.6-1.7 2.6 0v6.9c0-1.6 2.5-1.6 2.5 0v.8c0-1.6 2.5-1.6 2.5 0v.9c0-1.6 2.5-1.6 2.5 0V21c0 4-2.6 7-6.6 7h-1.4c-2.2 0-3.7-1-4.9-2.8l-3.4-5c-.8-1.3.9-2.6 2-1.5z' fill='rgba(255,236,200,.22)' stroke='%23fff8ec' stroke-width='2'/%3E%3Cpath d='M17.1 14.3v3.2M19.6 15.1v2.6' stroke='%23fff8ec' stroke-width='1.2' opacity='.6'/%3E%3C/g%3E%3C/svg%3E") 13 5, pointer; }
+  .pg-btn:active { background: rgba(0,0,0,.18); }
+  .pg-btn:focus-visible { outline: 2px solid rgba(255,230,180,.7); outline-offset: 2px; }
+  .pager-close { position: absolute; left: 50%; bottom: -46px; translate: -50% 0; color: #fff; background: none; border: 0; opacity: .85;
+    font: 500 13px/1 Inter, sans-serif; letter-spacing: 0; text-transform: uppercase; }
+  .pager-close:hover { opacity: 1; }
+
+  /* mid-size screens: the bottom row gets crowded, lift the thought above it */
+  @media (max-width: 1180px) {
+    .thought { bottom: calc(var(--edge) + 44px); font-size: 24px; }
+  }
+  @media (max-width: 900px) {
+    .topright { gap: 28px; }
+    .status { display: none; }
+  }
+  @media (max-width: 700px) {
+    .mem-pic { width: 42px; height: 42px; }
+    .legal-card { padding: 34px 24px 26px; } .legal-card h2 { font-size: 28px; }
+    :root { --edge: 14px; }
+    .ui, .tag { font-size: 11px; }
+    .name { font-size: 20px; }
+    .topright .contacts { display: none; }
+    .skills { gap: 10px; }
+    .thought { font-size: 20px; bottom: 64px; white-space: normal; width: calc(100vw - 2 * var(--edge)); text-align: center; }
+    .gal { bottom: 52px; gap: 16px; } .gal a { min-width: 0; } .gal .nm { max-width: 9em; overflow: hidden; text-overflow: ellipsis; }
+    .tag { width: 112px; height: 112px; margin: -56px 0 0 -56px; font-size: 10px; }
+    #loader .meta { font-size: 11px; }
+  }

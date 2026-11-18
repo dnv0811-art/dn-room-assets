@@ -569,6 +569,7 @@ const BASE = window.DN_BASE || '';
 const CORS = /^https?:/.test(BASE) && !BASE.startsWith(location.origin);   // assets on another host: ask for CORS (WebGL needs it)
 const ASSET = p => !p ? p : (window.OBJECT_DATA && window.OBJECT_DATA[p]) || (/^(data:|blob:|https?:|\/)/.test(p) ? p : BASE + p);
 const corsify = el => { if (CORS) el.crossOrigin = 'anonymous'; return el; };
+const corsVideo = el => { el.crossOrigin = 'anonymous'; return el; };     // the clips live on another host: WebGL needs CORS for them
 
 /* =====================================================================
    WORKS — the projects, in order. Each one is a TV channel and a tape on the shelf.
@@ -578,20 +579,21 @@ const corsify = el => { if (CORS) el.crossOrigin = 'anonymous'; return el; };
    sticker: colour of the "Play the site" sticker, from the cover's accent
    still:   the site's picture on the TV until its clip has loaded (or if it has none) → projects/<name>-still.jpg;
             without one the TV shows the cover
-   tv:      the short looping clip on the TV        → projects/<name>-tv.mp4
-   tape:    the long walkthrough the cassette plays → projects/<name>-tape.mp4
+   tv:      the short looping clip on the TV        → BS('code from Boomstream') or projects/<name>-tv.mp4
+   tape:    the long walkthrough the cassette plays → BS('code from Boomstream') or projects/<name>-tape.mp4
    A clip that isn't uploaded yet is fine: the TV keeps the still, the sticker says "Coming soon".
    ===================================================================== */
+const BS = code => `https://cdn-g.boomstream.com/balancer/${code}.mp4`;   // a clip on Boomstream: its "Pseudo MP4" link (720p; Slide Projex's short one is 480p)
 const WORKS = [
-  { title: 'QueenLash',    tag: 'Cosmetics · Online store',       sticker: '#efb0cb', cover: 'projects/queenlash-cover.jpg',   still: 'projects/queenlash-still.jpg', tv: 'projects/queenlash-tv.mp4',   tape: 'projects/queenlash-tape.mp4' },
-  { title: 'Meva Fresh',   tag: 'Fruit import · Corporate site',  sticker: '#b3d95c', cover: 'projects/mevafresh-cover.jpg',   still: 'projects/mevafresh-still.jpg', tv: 'projects/mevafresh-tv.mp4',   tape: 'projects/mevafresh-tape.mp4' },
-  { title: 'Arkhidom',     tag: 'Architecture · Website',         sticker: '#f0c08f', cover: 'projects/arkhidom-cover.jpg',    still: 'projects/arkhidom-still.jpg', tv: 'projects/arkhidom-tv.mp4',    tape: 'projects/arkhidom-tape.mp4' },
-  { title: 'Fuenf',        tag: 'Fashion & production · Website', sticker: '#cdf03a', cover: 'projects/fuenf-cover.jpg',       still: 'projects/fuenf-still.jpg', tv: 'projects/fuenf-tv.mp4',       tape: 'projects/fuenf-tape.mp4' },
-  { title: 'Simply',       tag: 'AI implementation · Website',    sticker: '#ffd23f', cover: 'projects/simply-cover.jpg',      still: 'projects/simply-still.jpg', tv: 'projects/simply-tv.mp4',      tape: 'projects/simply-tape.mp4' },
-  { title: 'Slide Projex', tag: 'Video production · One-pager',   sticker: '#e6f24e', cover: 'projects/slideprojex-cover.jpg', still: 'projects/slideprojex-still.jpg', tv: 'projects/slideprojex-tv.mp4', tape: 'projects/slideprojex-tape.mp4' },
-  { title: 'Sam Yakushev', tag: 'Entrepreneur · Personal site',   sticker: '#ec5a4c', cover: 'projects/samyakushev-cover.jpg', still: 'projects/samyakushev-still.jpg', tv: 'projects/samyakushev-tv.mp4', tape: 'projects/samyakushev-tape.mp4' },
-  { title: 'Blocklabs',    tag: 'Web3 · Promo site',              sticker: '#f2b53a', cover: 'projects/blocklabs-cover.jpg',   still: 'projects/blocklabs-still.jpg', tv: 'projects/blocklabs-tv.mp4',   tape: 'projects/blocklabs-tape.mp4' },
-  { title: 'Clinique 7',   tag: 'Plastic surgery · Landing page', sticker: '#b9a6e6', cover: 'projects/clinique-cover.jpg',    still: 'projects/clinique7-still.jpg', tv: 'projects/clinique7-tv.mp4',   tape: 'projects/clinique7-tape.mp4' },
+  { title: 'QueenLash',    tag: 'Cosmetics · Online store',       sticker: '#efb0cb', cover: 'projects/queenlash-cover.jpg',   still: 'projects/queenlash-still.jpg', tv: BS('MClaN5PK-B8wEwvbw'),   tape: BS('L7kR5JBg-B8wEwvbw') },
+  { title: 'Meva Fresh',   tag: 'Fruit import · Corporate site',  sticker: '#b3d95c', cover: 'projects/mevafresh-cover.jpg',   still: 'projects/mevafresh-still.jpg', tv: BS('AnCWW5Wx-B8wEwvbw'),   tape: BS('fG42qqll-B8wEwvbw') },
+  { title: 'Arkhidom',     tag: 'Architecture · Website',         sticker: '#f0c08f', cover: 'projects/arkhidom-cover.jpg',    still: 'projects/arkhidom-still.jpg', tv: BS('z3YHsqrS-B8wEwvbw'),    tape: BS('ZXNCeaUg-B8wEwvbw') },
+  { title: 'Fuenf',        tag: 'Fashion & production · Website', sticker: '#cdf03a', cover: 'projects/fuenf-cover.jpg',       still: 'projects/fuenf-still.jpg', tv: BS('sUqJ5Hre-B8wEwvbw'),       tape: BS('f1O8MmdR-B8wEwvbw') },
+  { title: 'Simply',       tag: 'AI implementation · Website',    sticker: '#ffd23f', cover: 'projects/simply-cover.jpg',      still: 'projects/simply-still.jpg', tv: BS('3SSxLUGG-B8wEwvbw'),      tape: BS('7gYnyLMG-B8wEwvbw') },
+  { title: 'Slide Projex', tag: 'Video production · One-pager',   sticker: '#e6f24e', cover: 'projects/slideprojex-cover.jpg', still: 'projects/slideprojex-still.jpg', tv: BS('c89W6CxH-V1bGvzwh'), tape: BS('cqKLg9mG-B8wEwvbw') },
+  { title: 'Sam Yakushev', tag: 'Entrepreneur · Personal site',   sticker: '#ec5a4c', cover: 'projects/samyakushev-cover.jpg', still: 'projects/samyakushev-still.jpg', tv: BS('rA4qBtpB-B8wEwvbw'), tape: BS('TQuredYt-B8wEwvbw') },
+  { title: 'Blocklabs',    tag: 'Web3 · Promo site',              sticker: '#f2b53a', cover: 'projects/blocklabs-cover.jpg',   still: 'projects/blocklabs-still.jpg', tv: BS('ciIl7NdX-B8wEwvbw'),   tape: 'projects/blocklabs-tape.mp4' },
+  { title: 'Clinique 7',   tag: 'Plastic surgery · Landing page', sticker: '#b9a6e6', cover: 'projects/clinique-cover.jpg',    still: 'projects/clinique7-still.jpg', tv: BS('8V8zOo3n-B8wEwvbw'),   tape: BS('oQsmE7Xq-B8wEwvbw') },
 ];
 // the TV's channels and the shelf's tapes are the same list, in the same order
 const PROJECTS = WORKS.map(w => ({ title: w.title, tag: w.tag, video: w.tv, img: w.still, cover: w.cover }));
@@ -1221,8 +1223,8 @@ void main(){
       const pic = p.img || p.cover;
       if (pic) { const im = corsify(new Image()); im.onload = () => put(im); im.src = embedded[pic] || ASSET(pic); }
       if (p.video) {
-        const v = corsify(document.createElement('video'));
-        v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto';
+        const v = corsVideo(document.createElement('video'));
+        v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'none';   // fetched when its channel comes on; the still shows until then
         if (embedded[p.video]) {   // opened from disk: play the embedded copy through a blob URL
           const [head, b64] = embedded[p.video].split(','), bin = atob(b64), bytes = new Uint8Array(bin.length);
           for (let k = 0; k < bin.length; k++) bytes[k] = bin.charCodeAt(k);
@@ -1374,7 +1376,7 @@ void main(){
   };
   /* ---- a project's tape playing in the VCR: its long video on the tube, run by the set's own buttons ---- */
   const VP = { on: false, shown: false, close: false, paused: false, title: '', seekUntil: 0, seekDir: 1, endT: 0,
-    v: corsify(document.createElement('video')), cv: document.createElement('canvas'), tex: makeTex(null) };
+    v: corsVideo(document.createElement('video')), cv: document.createElement('canvas'), tex: makeTex(null) };
   VP.v.playsInline = true; VP.v.preload = 'auto';
   VP.cv.width = TEX_W; VP.cv.height = TEX_H; VP.c = VP.cv.getContext('2d');
   // up close for watching: the glass and its bezel fill the frame
@@ -1515,7 +1517,7 @@ void main(){
   // since WebGL won't take frames of a local file
   const tapeBlobs = {};
   async function tapeSrc(path) {
-    if (location.protocol !== 'file:') return encodeURI(ASSET(path));
+    if (location.protocol !== 'file:' || /^https?:/.test(path)) return encodeURI(ASSET(path));
     if (tapeBlobs[path]) return tapeBlobs[path];
     if (!window.TAPE_DATA) await new Promise(res => { const sc = document.createElement('script'); sc.src = 'tapes-data.js'; sc.onload = sc.onerror = res; document.head.appendChild(sc); });
     const d = window.TAPE_DATA && window.TAPE_DATA[path]; if (!d) return null;
@@ -2017,6 +2019,7 @@ void main(){
   async function hasTape(path) {   // is the clip uploaded yet? (asked once per tape)
     if (!path) return false;
     if (path in tapeOk) return tapeOk[path];
+    if (/^https?:/.test(path)) return (tapeOk[path] = true);   // on the video host: a failed load falls back below
     if (location.protocol === 'file:') return (tapeOk[path] = !!(await tapeSrc(path)));
     try { const r = await fetch(encodeURI(ASSET(path)), { method: 'HEAD' }); return (tapeOk[path] = r.ok); }
     catch (e) { return true; }   // can't tell (the host won't answer a HEAD): try to play it; a failed load falls back below

@@ -798,7 +798,7 @@ const TAPES = WORKS.map(w => ({ title: w.title, tag: w.tag, sticker: w.sticker, 
   const t0 = performance.now();
   let shown = 0;
   function loaderTick(now) {
-    const el = now - t0;
+    const el = Math.max(0, now - t0);           // a frame's timestamp can be earlier than t0 on a busy page
     const eased = Math.min(1, el / MIN_TIME);   // even pace: the hiss gets its share of the bar instead of rushing past it
     const target = Math.floor(Math.min(eased, loaded) * 100);
     if (target > shown) { shown = Math.min(target, shown + Math.max(1, Math.round((target - shown) * .18))); setCount(shown); }

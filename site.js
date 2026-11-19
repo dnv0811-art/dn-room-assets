@@ -3008,7 +3008,6 @@ void main(){
     } else {
       const it = itemAt(e);
       if (!it) {   // the magnifier works anywhere: lean in on that spot of the room
-        if (TOUCH) return;   // phones look around by dragging; a missed tap shouldn't throw the camera forward
         zoomTo(ROOM_ZOOM(), screenToView(e.clientX / innerWidth, e.clientY / innerHeight));
         return;
       }

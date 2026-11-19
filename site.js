@@ -2509,13 +2509,15 @@ void main(){
   const NB_ORDER_IDS = ['funko', 'sega', 'cart', 'ball', 'tv', 'matrix', 'vinyl', 'plant', 'wolverine',
                         'tote', 'cooper', 'halflife', 'tokyo', 'cat', 'munchkin', 'sneakers', 'mug', 'cap'];
   const NB_ORDER = [...NB_ORDER_IDS.map(id => ITEMS.find(i => i.id === id)).filter(Boolean), ...ITEMS.filter(i => !NB_ORDER_IDS.includes(i.id))];
+  // the folder's pictures come from the asset host: asked for with CORS, so the folder can be drawn onto its cover in WebGL
+  const XO = CORS ? ' crossorigin="anonymous"' : '';
   function itemHTML(it, slot) {
     const found = explored.has(it.id), png = it.nbImg ? ASSET(it.nbImg) : pngOf(it), title = it.nbTitle || (it.id === 'tv' ? 'The TV' : (it.note ? it.note.title : ''));
     // objects with a cut-out PNG are always objects (blurred until found); the rest are taped polaroids (blank until found)
     const tvset = it.screen && !it.photo;   // frames from a show/film: they sit in the folder on a little TV, not as a photo
-    const pic = tvset ? `<span class="tvset"><img class="cut" alt="" src="${ASSET('objects/tv.png')}">${found ? `<span class="mt-screen"><img alt="" src="${ASSET(it.screen)}"><i class="mt-scan"></i></span>` : ''}</span>`
-      : png ? `<img class="cut${it.spin && found ? ' spin' : ''}" alt="" src="${png}">`
-      : `<span class="photo">${found ? `<img alt="" src="${ASSET(it.photo) || ASSET(it.screen) || cropOf(it)}">` : '<i class="blank"></i>'}</span>`;
+    const pic = tvset ? `<span class="tvset"><img${XO} class="cut" alt="" src="${ASSET('objects/tv.png')}">${found ? `<span class="mt-screen"><img${XO} alt="" src="${ASSET(it.screen)}"><i class="mt-scan"></i></span>` : ''}</span>`
+      : png ? `<img${XO} class="cut${it.spin && found ? ' spin' : ''}" alt="" src="${png}">`
+      : `<span class="photo">${found ? `<img${XO} alt="" src="${ASSET(it.photo) || ASSET(it.screen) || cropOf(it)}">` : '<i class="blank"></i>'}</span>`;
     // taped photos sit a bit off and askew; cut-out objects stand straight in the middle of their cell
     // cut-out objects and the little TVs stand straight in the middle of their cell; taped photos sit a bit off and
     // askew. The caption always leans the same way as its picture. --s: per-object size in the folder

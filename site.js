@@ -592,7 +592,7 @@ const WORKS = [
   { title: 'Simply',       tag: 'AI implementation · Website',    sticker: '#ffd23f', cover: 'projects/simply-cover.jpg',      still: 'projects/simply-still.jpg', tv: BS('3SSxLUGG-B8wEwvbw'),      tape: BS('7gYnyLMG-B8wEwvbw') },
   { title: 'Slide Projex', tag: 'Video production · One-pager',   sticker: '#e6f24e', cover: 'projects/slideprojex-cover.jpg', still: 'projects/slideprojex-still.jpg', tv: BS('c89W6CxH-V1bGvzwh'), tape: BS('cqKLg9mG-B8wEwvbw') },
   { title: 'Sam Yakushev', tag: 'Entrepreneur · Personal site',   sticker: '#ec5a4c', cover: 'projects/samyakushev-cover.jpg', still: 'projects/samyakushev-still.jpg', tv: BS('rA4qBtpB-B8wEwvbw'), tape: BS('TQuredYt-B8wEwvbw') },
-  { title: 'Blocklabs',    tag: 'Web3 · Promo site',              sticker: '#f2b53a', cover: 'projects/blocklabs-cover.jpg',   still: 'projects/blocklabs-still.jpg', tv: BS('ciIl7NdX-B8wEwvbw'),   tape: 'projects/blocklabs-tape.mp4' },
+  { title: 'Blocklabs',    tag: 'Web3 · Promo site',              sticker: '#f2b53a', cover: 'projects/blocklabs-cover.jpg',   still: 'projects/blocklabs-still.jpg', tv: BS('ciIl7NdX-B8wEwvbw'),   tape: BS('bVvgZ2HX-B8wEwvbw') },
   { title: 'Clinique 7',   tag: 'Plastic surgery · Landing page', sticker: '#b9a6e6', cover: 'projects/clinique-cover.jpg',    still: 'projects/clinique7-still.jpg', tv: BS('zAfB1GZw-B8wEwvbw'),   tape: BS('oQsmE7Xq-B8wEwvbw') },
 ];
 // the TV's channels and the shelf's tapes are the same list, in the same order
@@ -3137,7 +3137,8 @@ void main(){
     if (!st.zero) { st.zero = R; st.sum = [0, 0]; st.held = [0, 0]; return [0, 0]; }
     const t = tiltTurn(st.zero, R); st.zero = R;
     if (Math.abs(t[0]) > .5 || Math.abs(t[1]) > .5) return [0, 0];           // a glitch in the sensor, not a move
-    const side = a === 90 ? t[0] : a === 270 || a === -90 ? -t[0] : t[1];    // about the screen's upright axis
+    // turning the phone to the left looks to the left (the phone is a window: its back camera's direction leads)
+    const side = -(a === 90 ? t[0] : a === 270 || a === -90 ? -t[0] : t[1]);   // about the screen's upright axis
     const nod = a === 90 ? -t[1] : a === 270 || a === -90 ? t[1] : t[0];     // about the screen's level axis
     return [side, nod].map((v, i) => {
       const PLAY = 1.5, was = st.held[i];

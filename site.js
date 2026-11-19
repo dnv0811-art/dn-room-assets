@@ -3137,8 +3137,8 @@ void main(){
     const t = tiltTurn(st.zero, R); st.zero = R;
     if (Math.abs(t[0]) > .5 || Math.abs(t[1]) > .5) return [0, 0];           // a glitch in the sensor, not a move
     // turning the phone to the left looks to the left (the phone is a window: its back camera's direction leads)
-    const side = -(a === 90 ? t[0] : a === 270 || a === -90 ? -t[0] : t[1]);   // about the screen's upright axis
-    const nod = a === 90 ? -t[1] : a === 270 || a === -90 ? t[1] : t[0];     // about the screen's level axis
+    const side = -(a === 90 ? t[0] : a === 270 ? -t[0] : a === 180 ? -t[1] : t[1]);   // about the screen's upright axis
+    const nod = a === 90 ? -t[1] : a === 270 ? t[1] : a === 180 ? -t[0] : t[0];       // about the screen's level axis
     return [side, nod].map((v, i) => {
       const PLAY = 1.5, was = st.held[i];
       st.sum[i] += v * 57.3;
@@ -3146,13 +3146,24 @@ void main(){
       return st.held[i] - was;
     });
   }
+  // Which way up the screen is held (0 portrait, 180 upside down, 90 = the device's top to the left, 270 = to the right),
+  // read from gravity itself: browsers don't agree on the sign of screen.orientation.angle (iPads differ from phones).
+  // The screen's shape says portrait or landscape; gravity says which of the two. Lying flat, the last answer is kept.
+  function tiltHold(R, landscape, prev) {
+    const ux = R[6], uy = R[7];   // the world's "up" in the device's own axes (x to its right, y to its top)
+    if (landscape) return Math.abs(ux) > .3 ? (ux > 0 ? 90 : 270) : prev === 90 || prev === 270 ? prev : 90;
+    return Math.abs(uy) > .3 ? (uy > 0 ? 0 : 180) : prev === 0 || prev === 180 ? prev : 0;
+  }
+  let tiltHeld = 0;
   function onTilt(e) {
     if (e.gamma == null || e.beta == null) return;
     if (e.type === 'deviceorientation') tiltRel = true; else if (tiltRel) return;   // some Androids only send the "absolute" kind
     if (!tiltSeen) { tiltSeen = true; if (!tiltOff) setTilt(true); }                // the sensor is alive
     if (!tiltOn) return;
-    const a = ((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0) % 360;
-    const [side, nod] = tiltStep(tiltState, tiltR(e.alpha || 0, e.beta, e.gamma), a);
+    const R = tiltR(e.alpha || 0, e.beta, e.gamma);
+    const was = tiltHeld; tiltHeld = tiltHold(R, innerWidth > innerHeight, tiltHeld);
+    if (tiltHeld !== was) tiltState.zero = null;   // turned the device round: start afresh from here
+    const [side, nod] = tiltStep(tiltState, R, tiltHeld);
     if (!S.started || VP.on || document.body.classList.contains('note')) return;    // still under a note, the tape shelf or a playing tape
     // a share of what's on screen per degree, so it feels the same at any zoom
     const v = view(true), kx = S.zoomed ? .028 : .04, ky = S.zoomed ? .022 : .04;
